@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".SignUpActivity">
+    <com.google.android.flexbox.FlexboxLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="24dp"
+        app:flexDirection="column"
+        app:justifyContent="center"
+        app:flow_verticalGap="8dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to ComicWave"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:textColor="@color/primary"
+            android:textSize="24sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:text="Create an account first before you begin your comic journey" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Full Name"
+            android:textColor="@color/white" />
+
+        <EditText
+            android:id="@+id/signUpFullNameField"
+            style="@style/customEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="John Appleseed"
+            tools:layout_editor_absoluteY="223dp" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Email"
+            android:textColor="@color/white" />
+
+        <EditText
+            android:id="@+id/signUpEmailField"
+            style="@style/customEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="johnappleseed@example.com"
+            android:inputType="textEmailAddress"
+            tools:layout_editor_absoluteY="319dp" />
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Password"
+            android:textColor="@color/white" />
+
+        <EditText
+            android:id="@+id/signUpPasswordField"
+            style="@style/customEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="textPassword"
+            tools:layout_editor_absoluteY="414dp" />
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Confirm Password"
+            android:textColor="@color/white" />
+
+        <EditText
+            android:id="@+id/signUpConfirmPasswordField"
+            style="@style/customEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="textPassword"
+            tools:layout_editor_absoluteY="510dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/signUpSignUpButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="@color/primary"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="Sign Up"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/white"
+            app:cornerRadius="4dp"
+            tools:layout_editor_absoluteY="574dp" />
+        <LinearLayout
+            android:id="@+id/signUpGoToLoginpLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:gravity="start"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already have an account?"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/signUpLoginButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="Login"
+                android:layout_marginLeft="8dp"
+                android:textColor="@color/primary" />
+        </LinearLayout>
+    </com.google.android.flexbox.FlexboxLayout>
+    <ProgressBar
+        android:id="@+id/signUpProgressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

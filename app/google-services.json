@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "494126440591",
+    "project_id": "comicwave-68459",
+    "storage_bucket": "comicwave-68459.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494126440591:android:407c49ecdeaa48f68110fa",
+        "android_client_info": {
+          "package_name": "com.example.comicwave"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494126440591-f28gu4atjnifkoaua6u345vdrsit3k3h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY6MWe7Jyh9N-jLRpavhz0IKS5fvRBWMg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494126440591-f28gu4atjnifkoaua6u345vdrsit3k3h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
