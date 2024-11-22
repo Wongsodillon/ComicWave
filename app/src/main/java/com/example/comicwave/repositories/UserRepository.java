@@ -8,6 +8,8 @@ import com.example.comicwave.database.ComicWaveDB;
 import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.User;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -15,6 +17,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class UserRepository {
@@ -91,7 +94,6 @@ public class UserRepository {
             listener.onFinish(false);
             return;
         }
-        Log.d("LOGIN CHECK", name + " " + firebaseUser.getEmail());
         User user = new User(firebaseUser.getUid(), firebaseUser.getEmail(), name);
         Map<String, Object> userData = user.getMappedData();
         userRef.document(firebaseUser.getUid()).set(userData)
@@ -116,4 +118,5 @@ public class UserRepository {
         mAuth.signOut();
         CURRENT_USER = null;
     }
+
 }
