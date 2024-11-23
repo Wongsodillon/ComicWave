@@ -5,15 +5,15 @@ import com.google.firebase.Timestamp;
 public class Favorites {
     private String comicId;
     private String title;
-    private String thumbnail;
+    private String imageUrl;
     private Timestamp timestamp;
 
     public Favorites() {}
 
-    public Favorites(String comicId, String title, String thumbnail, Timestamp timestamp) {
+    public Favorites(String comicId, String title, String imageUrl, Timestamp timestamp) {
         this.comicId = comicId;
         this.title = title;
-        this.thumbnail = thumbnail;
+        this.imageUrl = imageUrl;
         this.timestamp = timestamp;
     }
 
@@ -33,12 +33,12 @@ public class Favorites {
         this.title = title;
     }
 
-    public String getThumbnail() {
-        return thumbnail;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public Timestamp getTimestamp() {

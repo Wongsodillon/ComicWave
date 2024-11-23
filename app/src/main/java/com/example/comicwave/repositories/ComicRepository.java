@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Comic;
+import com.example.comicwave.models.Favorites;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -42,6 +44,30 @@ public class ComicRepository {
                 listener.onFinish(comic);
             }
         });
+    }
+
+    public static void getFavoriteComics(String userId, OnFinishListener<ArrayList<Favorites>> listener) {
+        CollectionReference favoriteRef = UserRepository.userRef.document(userId).collection("favorites");
+        ArrayList<Favorites> favorites = new ArrayList<>();
+        favoriteRef.get().addOnSuccessListener(snapshots -> {
+            for (DocumentSnapshot snapshot : snapshots) {
+                Favorites favorite = documentToFavorites(snapshot);
+                favorites.add(favorite);
+                Log.d("Favorite New", favorite.getComicId());
+            }
+            listener.onFinish(favorites);
+        }).addOnFailureListener(e -> {
+        });
+    }
+
+    public static Favorites documentToFavorites(DocumentSnapshot docs) {
+        Favorites favorites = new Favorites(
+                docs.getId(),
+                (String) docs.get("title"),
+                (String) docs.get("imageUrl"),
+                (Timestamp) docs.get("createdAt")
+        );
+        return favorites;
     }
 
     public static Comic documentToComic(DocumentSnapshot docs) {

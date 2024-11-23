@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.comicwave.adapters.ComicSliderAdapter;
+import com.example.comicwave.adapters.FavoritesSliderAdapter;
 import com.example.comicwave.models.Comic;
+import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.User;
 import com.example.comicwave.repositories.ComicRepository;
 import com.example.comicwave.repositories.UserRepository;
@@ -30,9 +32,11 @@ import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private RecyclerView homeContinueReadingSlider;
+    private RecyclerView homeContinueReadingSlider, homeFavoritesSlider;
     private ArrayList<Comic> continueReadingComics;
+    private ArrayList<Favorites> favoriteComics;
     private ComicSliderAdapter continueReadingAdapter;
+    private FavoritesSliderAdapter favoritesAdapter;
     private ImageView homeFeaturedImage;
     private TextView homeFeaturedTitle, homeFeaturedGenres;
     private void initComponents() {
@@ -42,46 +46,43 @@ public class HomeActivity extends AppCompatActivity {
         homeFeaturedGenres = findViewById(R.id.homeFeaturedGenres);
 
         homeContinueReadingSlider = findViewById(R.id.homeContinueReadingSlider);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        homeContinueReadingSlider.setLayoutManager(linearLayoutManager);
+        LinearLayoutManager continueReadingManager = new LinearLayoutManager(this);
+        continueReadingManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        homeContinueReadingSlider.setLayoutManager(continueReadingManager);
 
         continueReadingComics = new ArrayList<>();
         continueReadingAdapter = new ComicSliderAdapter(continueReadingComics, R.layout.item_slider);
         homeContinueReadingSlider.setAdapter(continueReadingAdapter);
 
-//        DocumentReference sourceDocRef = db.collection("comic").document("TiX6DUlwWe8d9tzwvnfW");
-//            sourceDocRef.get().addOnCompleteListener(task -> {
-//                if (task.isSuccessful() && task.getResult() != null) {
-//                    Map<String, Object> documentData = task.getResult().getData();
-//                    if (documentData != null) {
-//                        for (int i = 0; i < 1; i++) {
-//                            db.collection("comic").add(documentData).addOnCompleteListener(addTask -> {
-//                                if (addTask.isSuccessful()) {
-//                                    String newDocId = addTask.getResult().getId();
-//                                    Log.d("New ID", newDocId);
-//                                } else {
-//                                    Log.d("New ID", "Failed to duplicate document " + task.getResult().getId());
-//                                }
-//                            });
-//                        }
-//                    }
-//                }
-//            });
+        homeFavoritesSlider = findViewById(R.id.homeFavoritesSlider);
+        LinearLayoutManager favoritesManager = new LinearLayoutManager(this);
+        favoritesManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        homeFavoritesSlider.setLayoutManager(favoritesManager);
+
+        favoriteComics = new ArrayList<>();
+        favoritesAdapter = new FavoritesSliderAdapter(favoriteComics, R.layout.item_slider);
+        homeFavoritesSlider.setAdapter(favoritesAdapter);
     }
 
 
     private void fetchData() {
+        ComicRepository.getFeaturedComic(comic -> {
+            Glide.with(this).load(comic.getImageUrl()).into(homeFeaturedImage);
+            homeFeaturedTitle.setText(comic.getTitle());
+            homeFeaturedGenres.setText(String.join(", ", comic.getGenres()));
+        });
+
         ComicRepository.getContinueWatching(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
             continueReadingComics.clear();
             continueReadingComics.addAll(comics);
             continueReadingAdapter.notifyDataSetChanged();
         });
 
-        ComicRepository.getFeaturedComic(comic -> {
-            Glide.with(this).load(comic.getImageUrl()).into(homeFeaturedImage);
-            homeFeaturedTitle.setText(comic.getTitle());
-            homeFeaturedGenres.setText(String.join(", ", comic.getGenres()));
+        ComicRepository.getFavoriteComics(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+            favoriteComics.clear();
+            favoriteComics.addAll(comics);
+            Log.d("Favorites", "Updating adapter with " + favoriteComics.size() + " items.");
+            favoritesAdapter.notifyDataSetChanged();
         });
     }
 
