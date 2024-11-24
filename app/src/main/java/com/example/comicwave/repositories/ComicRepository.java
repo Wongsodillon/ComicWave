@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ComicRepository {
@@ -70,17 +71,35 @@ public class ComicRepository {
         return favorites;
     }
 
+    public static void getComicsBySchedule(String schedule, OnFinishListener<ArrayList<Comic>> listener) {
+        ArrayList<Comic> comics = new ArrayList<>();
+        comicRef.whereEqualTo("schedule", schedule).get()
+                .addOnSuccessListener(snapshots -> {
+                    for (DocumentSnapshot snapshot : snapshots) {
+                        Comic comic = documentToComic(snapshot);
+                        comics.add(comic);
+                        Log.d("Schedule New", comic.getId());
+                    }
+                    listener.onFinish(comics);
+                })
+                .addOnFailureListener(e -> {
+
+                });
+    }
+
     public static Comic documentToComic(DocumentSnapshot docs) {
         Comic comic = new Comic();
         comic.setId(docs.getId());
         comic.setTitle((String) docs.get("title"));
         comic.setImageUrl((String) docs.get("imageUrl"));
+        comic.setDescription((String) docs.get("description"));
         List<String> genres = (List<String>) docs.get("genres");
-        if (genres != null) {
-            comic.setGenres(new ArrayList<>(genres));
-        } else {
-            comic.setGenres(new ArrayList<>());
-        }
+        comic.setGenres(genres != null ? new ArrayList<>(genres) : new ArrayList<>());
+        comic.setAuthor((String) docs.get("author"));
+        comic.setRating(docs.getDouble("averageRating"));
+        comic.setSchedule((String) docs.get("schedule"));
+        comic.setTotalFavorites(docs.getDouble("totalFavorites").intValue());
+        comic.setTotalViews(docs.getDouble("totalViews").intValue());
         return comic;
     }
 

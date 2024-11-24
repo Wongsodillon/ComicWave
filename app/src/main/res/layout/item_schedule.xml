@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemScheduleLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="16dp"
+    >
+
+    <ImageView
+        android:id="@+id/itemScheduleImage"
+        android:layout_width="115dp"
+        android:layout_height="115dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image" />
+
+    <TextView
+        android:id="@+id/itemScheduleTitle"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:scrollHorizontally="false"
+        android:textColor="@color/white"
+        android:text="Sample Title Sample Title Title Title SampleTitle Sample Title"
+        android:textAlignment="textStart"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginTop="2dp"
+        >
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/view_icon" />
+        <TextView
+            android:id="@+id/itemScheduleViews"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="200k"
+            android:textSize="12sp"
+
+            android:textColor="@color/white"
+            android:layout_marginStart="4dp" />
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/star_icon"
+            android:layout_marginStart="12dp"
+            />
+        <TextView
+            android:id="@+id/itemScheduleRating"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="4.9"
+            android:textSize="12sp"
+
+            android:textColor="@color/white"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
