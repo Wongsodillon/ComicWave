@@ -1,15 +1,18 @@
 package com.example.comicwave.repositories;
 
 import android.util.Log;
+import android.view.View;
 
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
+import com.example.comicwave.models.ViewingHistory;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,8 +22,7 @@ public class ComicRepository {
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static CollectionReference comicRef = db.collection("comic");
 
-    public static void getContinueWatching(String userId, OnFinishListener<ArrayList<Comic>> listener) {
-        DocumentReference user = UserRepository.userRef.document(userId);
+    public static void getAllComics(String userId, OnFinishListener<ArrayList<Comic>> listener) {
         ArrayList<Comic> comics = new ArrayList<>();
         comicRef.get().addOnSuccessListener(querySnapshot -> {
             for (DocumentSnapshot document : querySnapshot) {
@@ -35,6 +37,24 @@ public class ComicRepository {
         }).addOnFailureListener(e -> {
 
         });
+    }
+
+    public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
+        CollectionReference viewingHistoryRef = UserRepository.userRef.document(userId).collection("viewingHistory");
+        ArrayList<ViewingHistory> histories = new ArrayList<>();
+        viewingHistoryRef.whereNotEqualTo("nextEpisodeId", "")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    for (DocumentSnapshot snapshot : snapshots) {
+                        ViewingHistory vh = documentToViewingHistory(snapshot);
+                        Log.d("View History", vh.getComicTitle());
+                        histories.add(vh);
+                    }
+                    listener.onFinish(histories);
+                })
+                .addOnFailureListener(e -> {
+
+                });
     }
 
     public static void getFeaturedComic(OnFinishListener<Comic> listener) {
@@ -59,6 +79,17 @@ public class ComicRepository {
             listener.onFinish(favorites);
         }).addOnFailureListener(e -> {
         });
+    }
+
+    public static ViewingHistory documentToViewingHistory(DocumentSnapshot docs) {
+        ViewingHistory viewingHistory = new ViewingHistory();
+        viewingHistory.setLastViewedTimestamp(docs.getTimestamp("lastViewedTimestamp"));
+        viewingHistory.setComicId(docs.getId());
+        viewingHistory.setImageUrl((String) docs.get("imageUrl"));
+        viewingHistory.setComicTitle((String) docs.get("comicTitle"));
+        viewingHistory.setLastViewedEpisodeId((String) docs.get("lastViewedEpisodeId"));
+        viewingHistory.setNextEpisodeId((String) docs.get("nextEpisodeId"));
+        return viewingHistory;
     }
 
     public static Favorites documentToFavorites(DocumentSnapshot docs) {

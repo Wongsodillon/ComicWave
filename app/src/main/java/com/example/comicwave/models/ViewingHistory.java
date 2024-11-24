@@ -3,11 +3,19 @@ package com.example.comicwave.models;
 import com.google.firebase.Timestamp;
 
 public class ViewingHistory {
+    private String comicId;
+    private String comicTitle;
+    private String imageUrl;
     private String lastViewedEpisodeId;
     private String nextEpisodeId;
     private Timestamp lastViewedTimestamp;
 
-    public ViewingHistory(String lastViewedEpisodeId, String nextEpisodeId) {
+    public ViewingHistory() {}
+
+    public ViewingHistory(String comicId, String comicTitle, String imageUrl, String lastViewedEpisodeId, String nextEpisodeId) {
+        this.comicId = comicId;
+        this.comicTitle = comicTitle;
+        this.imageUrl = imageUrl;
         this.lastViewedEpisodeId = lastViewedEpisodeId;
         this.nextEpisodeId = nextEpisodeId;
         this.lastViewedTimestamp = Timestamp.now();
@@ -35,5 +43,29 @@ public class ViewingHistory {
 
     public void setLastViewedTimestamp(Timestamp lastViewedTimestamp) {
         this.lastViewedTimestamp = lastViewedTimestamp;
+    }
+
+    public String getComicId() {
+        return comicId;
+    }
+
+    public void setComicId(String comicId) {
+        this.comicId = comicId;
+    }
+
+    public String getComicTitle() {
+        return comicTitle;
+    }
+
+    public void setComicTitle(String comicTitle) {
+        this.comicTitle = comicTitle;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

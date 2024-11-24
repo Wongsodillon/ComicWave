@@ -51,6 +51,7 @@ public class HomeActivity extends AppCompatActivity {
                     .commit();
         }
         BottomNavigationView navigationBar = findViewById(R.id.bottom_navigation);
+
         navigationBar.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.navigation_home) {
                 loadFragment(new HomeFragment());

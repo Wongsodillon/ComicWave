@@ -21,8 +21,10 @@ import com.bumptech.glide.Glide;
 import com.example.comicwave.R;
 import com.example.comicwave.adapters.ComicSliderAdapter;
 import com.example.comicwave.adapters.FavoritesSliderAdapter;
+import com.example.comicwave.adapters.ViewingHistoryAdapter;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
+import com.example.comicwave.models.ViewingHistory;
 import com.example.comicwave.repositories.ComicRepository;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -31,9 +33,9 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment {
 
     private RecyclerView homeContinueReadingSlider, homeFavoritesSlider;
-    private ArrayList<Comic> continueReadingComics;
+    private ArrayList<ViewingHistory> continueReadingComics;
     private ArrayList<Favorites> favoriteComics;
-    private ComicSliderAdapter continueReadingAdapter;
+    private ViewingHistoryAdapter continueReadingAdapter;
     private FavoritesSliderAdapter favoritesAdapter;
     private ImageView homeFeaturedImage;
     private TextView homeFeaturedTitle, homeFeaturedGenres;
@@ -51,7 +53,7 @@ public class HomeFragment extends Fragment {
         homeFavoritesSlider = view.findViewById(R.id.homeFavoritesSlider);
 
         continueReadingComics = new ArrayList<>();
-        continueReadingAdapter = new ComicSliderAdapter(continueReadingComics, R.layout.item_slider);
+        continueReadingAdapter = new ViewingHistoryAdapter(continueReadingComics, R.layout.item_slider);
         homeContinueReadingSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeContinueReadingSlider.setAdapter(continueReadingAdapter);
 
@@ -72,7 +74,7 @@ public class HomeFragment extends Fragment {
             homeFeaturedGenres.setText(String.join(", ", comic.getGenres()));
         });
 
-        ComicRepository.getContinueWatching(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+        ComicRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
             continueReadingComics.clear();
             continueReadingComics.addAll(comics);
             continueReadingAdapter.notifyDataSetChanged();
