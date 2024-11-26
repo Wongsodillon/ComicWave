@@ -39,22 +39,43 @@ public class ComicRepository {
         });
     }
 
+    public static void searchComics(String query, OnFinishListener<ArrayList<Comic>> listener) {
+        ArrayList<Comic> comics = new ArrayList<>();
+        comicRef.orderBy("title").startAt(query)
+                .endAt(query + "\uf8ff")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    for (DocumentSnapshot snapshot: snapshots) {
+                        Comic comic = documentToComic(snapshot);
+                        Log.d("Query Result", comic.getAuthor());
+                        comics.add(comic);
+                    }
+                    listener.onFinish(comics);
+                });
+    }
+
     public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
         CollectionReference viewingHistoryRef = UserRepository.userRef.document(userId).collection("viewingHistory");
         ArrayList<ViewingHistory> histories = new ArrayList<>();
         viewingHistoryRef.whereNotEqualTo("nextEpisodeId", "")
                 .get()
                 .addOnSuccessListener(snapshots -> {
-                    for (DocumentSnapshot snapshot : snapshots) {
-                        ViewingHistory vh = documentToViewingHistory(snapshot);
-                        Log.d("View History", vh.getComicTitle());
-                        histories.add(vh);
+                    if (snapshots.isEmpty()) {
+                        Log.d("View History", "No viewing history found for user: " + userId);
+                        listener.onFinish(histories);
+                    } else {
+                        for (DocumentSnapshot snapshot : snapshots) {
+                            ViewingHistory vh = documentToViewingHistory(snapshot);
+                            Log.d("View History", vh.getComicTitle());
+                            histories.add(vh);
+                        }
+                        listener.onFinish(histories);
                     }
-                    listener.onFinish(histories);
                 })
                 .addOnFailureListener(e -> {
-
+                    Log.e("View History", "Error fetching data", e);
                 });
+
     }
 
     public static void getFeaturedComic(OnFinishListener<Comic> listener) {

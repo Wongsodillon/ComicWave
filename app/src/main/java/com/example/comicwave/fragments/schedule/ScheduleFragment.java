@@ -29,7 +29,6 @@ public class ScheduleFragment extends Fragment {
 
     private Handler debounceHandler = new Handler(Looper.getMainLooper());
     private static final long DEBOUNCE_DELAY = 100;
-
     private RecyclerView scheduleRecyclerView;
     private ArrayList<Comic> comics;
     private ComicScheduleAdapter comicScheduleAdapter;

@@ -24,6 +24,7 @@ import com.example.comicwave.adapters.ComicSliderAdapter;
 import com.example.comicwave.adapters.FavoritesSliderAdapter;
 import com.example.comicwave.fragments.home.HomeFragment;
 import com.example.comicwave.fragments.schedule.ScheduleFragment;
+import com.example.comicwave.fragments.search.SearchFragment;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.User;
@@ -59,6 +60,10 @@ public class HomeActivity extends AppCompatActivity {
             }
             else if (item.getItemId() == R.id.navigation_schedule) {
                 loadFragment(new ScheduleFragment());
+                return true;
+            }
+            else  if (item.getItemId() == R.id.navigation_search) {
+                loadFragment(new SearchFragment());
                 return true;
             }
             else {
