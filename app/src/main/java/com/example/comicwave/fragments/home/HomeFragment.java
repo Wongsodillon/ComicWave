@@ -70,11 +70,12 @@ public class HomeFragment extends Fragment {
         continueReadingAdapter = new ViewingHistoryAdapter(continueReadingComics, R.layout.item_slider);
         homeContinueReadingSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeContinueReadingSlider.setAdapter(continueReadingAdapter);
-
+        Log.d("HomeFragment", "Continue Reading Adapter set with " + continueReadingComics.size() + " items");
         favoriteComics = new ArrayList<>();
         favoritesAdapter = new FavoritesSliderAdapter(favoriteComics, R.layout.item_slider);
         homeFavoritesSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeFavoritesSlider.setAdapter(favoritesAdapter);
+        Log.d("HomeFragment", "Favorites Adapter set with " + favoriteComics.size() + " items");
     }
 
     private void fetchData() {
@@ -85,20 +86,23 @@ public class HomeFragment extends Fragment {
         });
 
         ComicRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+            Log.d("HomeFragment", "Viewing history fetch complete.");
             continueReadingComics.clear();
-            if (comics.isEmpty()) {
-                Log.d("HomeFragment", "No comics to continue reading.");
-                homeContinueReadingLayout.setVisibility(View.GONE);
-            } else {
+            if (comics != null && !comics.isEmpty()) {
                 continueReadingComics.addAll(comics);
-                homeContinueReadingLayout.setVisibility(View.VISIBLE);
+                Log.d("HomeFragment", "Viewing history size: " + continueReadingComics.size());
             }
+            homeContinueReadingLayout.setVisibility(continueReadingComics.isEmpty() ? View.GONE : View.VISIBLE);
             continueReadingAdapter.notifyDataSetChanged();
         });
 
         ComicRepository.getFavoriteComics(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+            Log.d("HomeFragment", "Favorite comics fetch complete.");
             favoriteComics.clear();
-            favoriteComics.addAll(comics);
+            if (comics != null && !comics.isEmpty()) {
+                favoriteComics.addAll(comics);
+                Log.d("HomeFragment", "Favorites size: " + favoriteComics.size());
+            }
             favoritesAdapter.notifyDataSetChanged();
         });
     }

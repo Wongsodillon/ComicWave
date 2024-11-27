@@ -42,7 +42,6 @@ public class FavoritesSliderAdapter extends RecyclerView.Adapter<FavoritesSlider
     @Override
     public void onBindViewHolder(@NonNull FavoritesSliderViewHolder holder, int position) {
         Favorites favorite = favoriteList.get(position);
-        Log.d("FavoritesData", "Title: " + favorite.getTitle() + ", Image: " + favorite.getImageUrl());
         holder.itemSliderTitle.setText(favorite.getTitle());
         Glide.with(activityContext)
                 .load(favorite.getImageUrl())

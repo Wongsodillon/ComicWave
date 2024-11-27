@@ -47,7 +47,7 @@ public class ComicRepository {
                 .addOnSuccessListener(snapshots -> {
                     for (DocumentSnapshot snapshot: snapshots) {
                         Comic comic = documentToComic(snapshot);
-                        Log.d("Query Result", comic.getAuthor());
+//                        Log.d("Query Result", comic.getAuthor());
                         comics.add(comic);
                     }
                     listener.onFinish(comics);

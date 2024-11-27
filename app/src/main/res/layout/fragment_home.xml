@@ -92,9 +92,11 @@
                     android:id="@+id/homeContinueReadingSlider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false"
+                    android:scrollbars="horizontal" />
             </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/homeFavoritesSliderLayout"
