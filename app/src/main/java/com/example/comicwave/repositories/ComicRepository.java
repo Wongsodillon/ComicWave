@@ -3,8 +3,11 @@ package com.example.comicwave.repositories;
 import android.util.Log;
 import android.view.View;
 
+import com.example.comicwave.ComicDetailsActivity;
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Comic;
+import com.example.comicwave.models.ComicDetails;
+import com.example.comicwave.models.Episode;
 import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.ViewingHistory;
 import com.google.firebase.Timestamp;
@@ -16,12 +19,14 @@ import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class ComicRepository {
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static CollectionReference comicRef = db.collection("comic");
-
+    private static HashMap<String, ComicDetails> cachedComicDetails = new HashMap<>();
+    private static HashMap<String, ArrayList<Comic>> cachedScheduleData = new HashMap<>();
     public static void getAllComics(String userId, OnFinishListener<ArrayList<Comic>> listener) {
         ArrayList<Comic> comics = new ArrayList<>();
         comicRef.get().addOnSuccessListener(querySnapshot -> {
@@ -102,6 +107,105 @@ public class ComicRepository {
         });
     }
 
+    public static void checkIfComicIsFavorited(String comicId, String userId, OnFinishListener<Boolean> callback) {
+        DocumentReference favoriteDocs = UserRepository.userRef.document(userId).collection("favorites").document(comicId);
+        favoriteDocs.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                callback.onFinish(true);
+            }
+            else {
+                callback.onFinish(false);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("ComicDetails", "Error checking favorite status: " + comicId);
+            callback.onFinish(false);
+        });
+
+    }
+
+    public static void checkUserRating(String comicId, String userId, OnFinishListener<Double> callback) {
+        DocumentReference ratingDoc = UserRepository.userRef.document(userId).collection("ratings").document(comicId);
+        ratingDoc.get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        Double rating = snapshot.getDouble("rating");
+                        callback.onFinish(rating != null ? rating : 0.0);
+                    } else {
+                        callback.onFinish(0.0);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ComicRepository", "Error fetching rating for comic: " + comicId, e);
+                    callback.onFinish(0.0);
+                });
+    }
+
+    public static void getComicDetailsByID(String comicId, String userId, OnFinishListener<ComicDetails> listener) {
+        if (cachedComicDetails != null && cachedComicDetails.containsKey(comicId)) {
+            listener.onFinish(cachedComicDetails.get(comicId));
+            return;
+        }
+        DocumentReference docs = comicRef.document(comicId);
+        docs.get().addOnSuccessListener(snapshot -> {
+            if (snapshot != null && snapshot.exists()) {
+                Comic comic = documentToComic(snapshot);
+                checkIfComicIsFavorited(comicId, userId, isFavorited -> {
+                    checkUserRating(comicId, userId, userRating -> {
+                        ComicDetails comicDetails = new ComicDetails(comic, isFavorited, userRating);
+                        cachedComicDetails.put(comicId, comicDetails);
+                        listener.onFinish(comicDetails);
+                    });
+                });
+            } else {
+                listener.onFinish(null);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("ComicDetails", "Error fetching comic: " + comicId);
+            listener.onFinish(null);
+        });
+    }
+
+    public static void getWhereYouLeftOff(String comicId, String userId, OnFinishListener<Episode> listener) {
+        DocumentReference docs = UserRepository.userRef.document(userId).collection("viewingHistory").document(comicId);
+        docs.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                String episodeId = snapshot.getString("nextEpisodeId");
+                if (episodeId != null) {
+                    comicRef.document(comicId).collection("episode")
+                            .document(episodeId)
+                            .get()
+                            .addOnSuccessListener(episodeSnapshot -> {
+                                if (episodeSnapshot != null) {
+                                    Episode episode = documentToEpisode(episodeSnapshot);
+                                    Log.d("ComicDetails", episode.getTitle());
+                                    listener.onFinish(episode);
+                                } else {
+                                    listener.onFinish(null);
+                                }
+                            }).addOnFailureListener(e -> {
+                                listener.onFinish(null);
+                            });
+                }
+            } else {
+                listener.onFinish(null);
+            }
+        }).addOnFailureListener(e -> {
+            listener.onFinish(null);
+        });
+    }
+
+    public static Episode documentToEpisode(DocumentSnapshot docs) {
+        Episode episode = new Episode();
+        episode.setEpisodeId(docs.getId());
+        episode.setEpisodeNumber(docs.getDouble("episodeNumber").intValue());
+        episode.setImageUrl((String) docs.get("imageUrl"));
+        episode.setReleaseDate((Timestamp) docs.get("releaseDate"));
+        episode.setTitle((String) docs.get("title"));
+        List<String> contents = (List<String>) docs.get("content");
+        episode.setContent(contents != null ? new ArrayList<>(contents) : new ArrayList<>());
+        return episode;
+    }
+
     public static ViewingHistory documentToViewingHistory(DocumentSnapshot docs) {
         ViewingHistory viewingHistory = new ViewingHistory();
         viewingHistory.setLastViewedTimestamp(docs.getTimestamp("lastViewedTimestamp"));
@@ -124,6 +228,9 @@ public class ComicRepository {
     }
 
     public static void getComicsBySchedule(String schedule, OnFinishListener<ArrayList<Comic>> listener) {
+        if (cachedScheduleData != null && cachedScheduleData.containsKey(schedule)) {
+            listener.onFinish(cachedScheduleData.get(schedule));
+        }
         ArrayList<Comic> comics = new ArrayList<>();
         comicRef.whereEqualTo("schedule", schedule).get()
                 .addOnSuccessListener(snapshots -> {
@@ -132,6 +239,7 @@ public class ComicRepository {
                         comics.add(comic);
                         Log.d("Schedule New", comic.getId());
                     }
+                    cachedScheduleData.put(schedule, comics);
                     listener.onFinish(comics);
                 })
                 .addOnFailureListener(e -> {
@@ -147,6 +255,7 @@ public class ComicRepository {
         comic.setDescription((String) docs.get("description"));
         List<String> genres = (List<String>) docs.get("genres");
         comic.setGenres(genres != null ? new ArrayList<>(genres) : new ArrayList<>());
+        comic.setDescription((String) docs.get("description"));
         comic.setAuthor((String) docs.get("author"));
         comic.setRating(docs.getDouble("averageRating"));
         comic.setSchedule((String) docs.get("schedule"));

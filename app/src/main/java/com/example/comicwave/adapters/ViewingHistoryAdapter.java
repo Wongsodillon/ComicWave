@@ -14,13 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.comicwave.ComicDetails;
+import com.example.comicwave.ComicDetailsActivity;
 import com.example.comicwave.R;
-import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.ViewingHistory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAdapter.ViewingHistoryViewHolder> {
 
@@ -51,7 +49,8 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
                 .apply(RequestOptions.bitmapTransform(new RoundedCorners(8)))
                 .into(holder.itemSliderImage);
         holder.itemView.setOnClickListener(e -> {
-            Intent i = new Intent(activityContext, ComicDetails.class);
+            Intent i = new Intent(activityContext, ComicDetailsActivity.class);
+            i.putExtra("comicId", comic.getComicId());
             activityContext.startActivity(i);
         });
     }

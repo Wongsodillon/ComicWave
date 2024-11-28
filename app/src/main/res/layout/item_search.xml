@@ -47,8 +47,8 @@
             android:layout_height="wrap_content"
             app:alignItems="center">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/view_icon"
                 android:backgroundTint="@color/black"
                />
@@ -63,8 +63,8 @@
                 android:textSize="12sp"
                 />
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/favorites_icon"
                 android:backgroundTint="@color/black"
                 android:layout_marginStart="16dp"
@@ -80,8 +80,8 @@
                 android:textSize="12sp"
                 />
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/star_icon"
                 android:backgroundTint="@color/black"
                 android:layout_marginStart="16dp"

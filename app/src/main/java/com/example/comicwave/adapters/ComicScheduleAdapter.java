@@ -1,6 +1,7 @@
 package com.example.comicwave.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.comicwave.ComicDetailsActivity;
 import com.example.comicwave.R;
 import com.example.comicwave.helpers.NumberHelper;
 import com.example.comicwave.models.Comic;
@@ -49,6 +51,11 @@ public class ComicScheduleAdapter extends RecyclerView.Adapter<ComicScheduleAdap
         holder.itemScheduleTitle.setText(comic.getTitle());
         holder.itemScheduleRating.setText(comic.getRating().toString());
         holder.itemScheduleViews.setText(NumberHelper.format(comic.getTotalViews()));
+        holder.itemView.setOnClickListener(e -> {
+            Intent i = new Intent(activityContext, ComicDetailsActivity.class);
+            i.putExtra("comicId", comic.getId());
+            activityContext.startActivity(i);
+        });
     }
 
     @Override
