@@ -151,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                android:text="Lorem ipsum" />
+                android:text="" />
             <TextView
                 android:id="@+id/detailAuthor"
                 android:layout_width="match_parent"
@@ -250,6 +250,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:orientation="vertical"
+                android:visibility="invisible"
                 >
                 <TextView
                     android:layout_width="match_parent"
@@ -291,11 +292,41 @@
                     </LinearLayout>
                 </com.google.android.flexbox.FlexboxLayout>
             </LinearLayout>
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:alignItems="center"
+                app:justifyContent="space_between"
+                android:layout_marginTop="24dp"
+                >
+                <TextView
+                    android:id="@+id/detailEpisodeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:text="Episodes"
+                    android:textSize="20sp"
+                    />
+                <Button
+                    android:id="@+id/detailSortByButton"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Oldest"
+                    app:iconTint="@color/gray"
+                    app:icon="@drawable/arrow_gray_icon"
+                    android:textColor="@color/gray"
+                    app:iconGravity="textStart"
+                    android:paddingHorizontal="16dp"
+                    app:iconPadding="8dp"
+                     />
+            </com.google.android.flexbox.FlexboxLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/detailEpisodesList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"/>
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

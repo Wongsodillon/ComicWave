@@ -39,8 +39,8 @@ public class HomeFragment extends Fragment {
     private ViewingHistoryAdapter continueReadingAdapter;
     private FavoritesSliderAdapter favoritesAdapter;
     private ImageView homeFeaturedImage;
-    private TextView homeFeaturedTitle, homeFeaturedGenres;
-    private LinearLayout homeContinueReadingLayout;
+    private TextView homeFeaturedTitle, homeFeaturedGenres, homeContinueReadingText, homeFavoritesSliderText;
+    private LinearLayout homeContinueReadingLayout, homeFavoritesSliderLayout;
 
     @Nullable
     @Override
@@ -61,8 +61,10 @@ public class HomeFragment extends Fragment {
         homeContinueReadingSlider = view.findViewById(R.id.homeContinueReadingSlider);
         homeFavoritesSlider = view.findViewById(R.id.homeFavoritesSlider);
         homeContinueReadingLayout = view.findViewById(R.id.homeContinueReadingLayout);
+        homeFavoritesSliderLayout = view.findViewById(R.id.homeFavoritesSliderLayout);
 
         homeContinueReadingLayout.setVisibility(View.GONE);
+        homeFavoritesSliderLayout.setVisibility(View.GONE);
     }
 
     private void setupAdapters() {
@@ -70,12 +72,11 @@ public class HomeFragment extends Fragment {
         continueReadingAdapter = new ViewingHistoryAdapter(continueReadingComics, R.layout.item_slider);
         homeContinueReadingSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeContinueReadingSlider.setAdapter(continueReadingAdapter);
-        Log.d("HomeFragment", "Continue Reading Adapter set with " + continueReadingComics.size() + " items");
+
         favoriteComics = new ArrayList<>();
         favoritesAdapter = new FavoritesSliderAdapter(favoriteComics, R.layout.item_slider);
         homeFavoritesSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeFavoritesSlider.setAdapter(favoritesAdapter);
-        Log.d("HomeFragment", "Favorites Adapter set with " + favoriteComics.size() + " items");
     }
 
     private void fetchData() {
@@ -103,6 +104,7 @@ public class HomeFragment extends Fragment {
                 favoriteComics.addAll(comics);
                 Log.d("HomeFragment", "Favorites size: " + favoriteComics.size());
             }
+            homeFavoritesSliderLayout.setVisibility(favoriteComics.isEmpty() ? View.GONE : View.VISIBLE);
             favoritesAdapter.notifyDataSetChanged();
         });
     }

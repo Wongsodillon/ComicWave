@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.flexbox.FlexboxLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:alignItems="center"
+    android:id="@+id/itemEpisodeLayout"
+    android:layout_marginBottom="12dp">
+    <ImageView
+        android:id="@+id/itemEpisodeImage"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:src="@drawable/image" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp">
+        <TextView
+            android:id="@+id/itemEpisodeTitle"
+            android:layout_width="232dp"
+            android:layout_height="wrap_content"
+            android:text="4. Hero Not Your Typical Reincarnation story"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/itemEpisodeReleaseDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/gray"
+            android:text="22 Oct 2024" />
+    </LinearLayout>
+</com.google.android.flexbox.FlexboxLayout>

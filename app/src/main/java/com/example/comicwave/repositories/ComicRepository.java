@@ -17,6 +17,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -192,6 +193,27 @@ public class ComicRepository {
         }).addOnFailureListener(e -> {
             listener.onFinish(null);
         });
+    }
+
+    public static void getAllEpisodes(String comicId, OnFinishListener<ArrayList<Episode>> listener) {
+        comicRef.document(comicId).collection("episode")
+                .orderBy("episodeNumber")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                   if (snapshots.isEmpty()) {
+                       listener.onFinish(null);
+                   } else {
+                       ArrayList<Episode> episodes = new ArrayList<>();
+                       for (DocumentSnapshot snapshot : snapshots) {
+                           Episode episode = documentToEpisode(snapshot);
+                           episodes.add(episode);
+                           Log.d("ComicDetails", episode.getTitle());
+                       }
+                       listener.onFinish(episodes);
+                   }
+                }).addOnFailureListener(e -> {
+
+                });
     }
 
     public static Episode documentToEpisode(DocumentSnapshot docs) {

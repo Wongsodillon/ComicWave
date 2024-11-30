@@ -3,8 +3,10 @@ package com.example.comicwave;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,11 +16,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.comicwave.adapters.EpisodeAdapter;
 import com.example.comicwave.helpers.DateHelper;
 import com.example.comicwave.helpers.NumberHelper;
 import com.example.comicwave.models.Comic;
@@ -28,18 +32,23 @@ import com.example.comicwave.repositories.ComicRepository;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ComicDetailsActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private ImageView detailImage, detailFavoriteButton, detailWhereYouLeftOffImage;
-    private TextView detailTitle, detailGenres, detailViews, detailFavorites, detailRating, detailDescription,
-            detailAuthor, detailRatingText, detailFavoriteText, detailWhereYouLeftOffTitle, detailWhereYouLeftOffReleaseDate;
+    private TextView detailTitle, detailGenres, detailViews, detailFavorites, detailRating, detailDescription, detailAuthor,
+            detailRatingText, detailFavoriteText, detailWhereYouLeftOffTitle, detailWhereYouLeftOffReleaseDate, detailEpisodeText;
+    private Button detailSortByButton;
     private LinearLayout detailWhereYouLeftOffLayout;
     private String comicId;
     private ComicDetails comic;
     private ArrayList<Episode> episodes;
     private RecyclerView detailEpisodesList;
+    String selected;
+    private EpisodeAdapter adapter;
     private void initComponents() {
         toolbar = findViewById(R.id.detailToolbar);
         toolbar = findViewById(R.id.detailToolbar);
@@ -63,12 +72,22 @@ public class ComicDetailsActivity extends AppCompatActivity {
         detailRatingText = findViewById(R.id.detailRatingText);
         detailFavoriteButton = findViewById(R.id.detailFavoriteButton);
 
+
         detailWhereYouLeftOffLayout = findViewById(R.id.detailWhereYouLeftOffLayout);
         detailWhereYouLeftOffImage = findViewById(R.id.detailWhereYouLeftOffImage);
         detailWhereYouLeftOffTitle = findViewById(R.id.detailWhereYouLeftOffTitle);
         detailWhereYouLeftOffReleaseDate = findViewById(R.id.detailWhereYouLeftOffReleaseDate);
 
+        detailSortByButton = findViewById(R.id.detailSortByButton);
+        selected = detailSortByButton.getText().toString();
+
+        detailEpisodeText = findViewById(R.id.detailEpisodeText);
         detailEpisodesList = findViewById(R.id.detailEpisodesList);
+        episodes = new ArrayList<>();
+        adapter = new EpisodeAdapter(episodes);
+        detailEpisodesList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        detailEpisodesList.setAdapter(adapter);
+
     }
 
     @Override
@@ -104,6 +123,33 @@ public class ComicDetailsActivity extends AppCompatActivity {
         if (userRating != 0.0) {
             detailRatingText.setText(String.valueOf(userRating));
         }
+
+        detailSortByButton.setOnClickListener(e -> {
+            selected = detailSortByButton.getText().toString();
+            PopupMenu menu = new PopupMenu(this, detailSortByButton);
+            menu.getMenuInflater().inflate(R.menu.episodes_menu, menu.getMenu());
+            menu.setOnMenuItemClickListener(item -> {
+                if (item != null && item.getTitle().equals(selected)) {
+                    return true;
+                }
+                selected = item.getTitle().toString();
+                detailSortByButton.setText(selected);
+                Collections.sort(episodes, new Comparator<Episode>() {
+                    @Override
+                    public int compare(Episode o1, Episode o2) {
+                        if (selected.equals("Oldest")) {
+                            return o1.getEpisodeNumber() - o2.getEpisodeNumber();
+                        } else {
+                            return o2.getEpisodeNumber() - o1.getEpisodeNumber();
+                        }
+                    }
+                });
+                adapter.notifyDataSetChanged();
+                return true;
+            });
+            menu.show();
+        });
+
     }
 
     private void populateWhereYouLeftOff(Episode episode) {
@@ -140,5 +186,14 @@ public class ComicDetailsActivity extends AppCompatActivity {
                 populateWhereYouLeftOff(result);
             }
         });
+
+        ComicRepository.getAllEpisodes(comicId, result -> {
+            episodes.clear();
+            episodes.addAll(result);
+            detailEpisodeText.setText(String.format("Episodes (%d)", episodes.size()));
+            adapter.notifyDataSetChanged();
+        });
+
+
     }
 }
