@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:context=".fragments.ratingSheet.RatingSheetFragment">
+    <com.google.android.flexbox.FlexboxLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="48dp"
+        android:paddingVertical="32dp"
+        app:alignItems="center"
+        app:flexDirection="column"
+        app:justifyContent="center">
+        <ImageView
+            android:id="@+id/ratingSheetImage"
+            android:layout_width="270dp"
+            android:layout_height="270dp"
+            android:src="@drawable/image"/>
+        <TextView
+            android:id="@+id/ratingSheetTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:fontFamily="@font/poppins_medium"
+            android:layout_marginTop="16dp"
+            android:textAlignment="center"
+            android:text="How would you rate this comic?"
+            android:textColor="@color/white"
+            />
+        <RatingBar
+            android:id="@+id/ratingSheetRatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="0.5"
+            android:layout_marginTop="16dp"
+            android:theme="@style/RatingBar"
+            />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/ratingSheetButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="Rate"
+            android:layout_marginTop="16dp"
+            app:cornerRadius="4dp"
+            />
+
+    </com.google.android.flexbox.FlexboxLayout>
+
+
+</FrameLayout>

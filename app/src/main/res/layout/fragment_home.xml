@@ -85,6 +85,8 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
                     android:textSize="24sp"
+                    android:visibility="invisible"
+
                     android:fontFamily="@font/poppins_semi_bold"
                     android:text="Continue Reading" />
 
@@ -115,6 +117,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
                     android:textSize="24sp"
+                    android:visibility="invisible"
                     android:fontFamily="@font/poppins_semi_bold"
                     android:text="Favorites" />
 

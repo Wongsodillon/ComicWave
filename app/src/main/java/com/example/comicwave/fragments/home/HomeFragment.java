@@ -39,7 +39,7 @@ public class HomeFragment extends Fragment {
     private ViewingHistoryAdapter continueReadingAdapter;
     private FavoritesSliderAdapter favoritesAdapter;
     private ImageView homeFeaturedImage;
-    private TextView homeFeaturedTitle, homeFeaturedGenres, homeContinueReadingText, homeFavoritesSliderText;
+    private TextView homeFeaturedTitle, homeFeaturedGenres, homeContinueReadingText, homeFavoritesText;
     private LinearLayout homeContinueReadingLayout, homeFavoritesSliderLayout;
 
     @Nullable
@@ -63,8 +63,9 @@ public class HomeFragment extends Fragment {
         homeContinueReadingLayout = view.findViewById(R.id.homeContinueReadingLayout);
         homeFavoritesSliderLayout = view.findViewById(R.id.homeFavoritesSliderLayout);
 
-        homeContinueReadingLayout.setVisibility(View.GONE);
-        homeFavoritesSliderLayout.setVisibility(View.GONE);
+        homeFavoritesText = view.findViewById(R.id.homeFavoritesText);
+        homeContinueReadingText = view.findViewById(R.id.homeContinueReadingText);
+
     }
 
     private void setupAdapters() {
@@ -86,25 +87,38 @@ public class HomeFragment extends Fragment {
             homeFeaturedGenres.setText(String.join(", ", comic.getGenres()));
         });
 
+        continueReadingAdapter.setLoading(true);
         ComicRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
-            Log.d("HomeFragment", "Viewing history fetch complete.");
             continueReadingComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 continueReadingComics.addAll(comics);
                 Log.d("HomeFragment", "Viewing history size: " + continueReadingComics.size());
             }
-            homeContinueReadingLayout.setVisibility(continueReadingComics.isEmpty() ? View.GONE : View.VISIBLE);
+            continueReadingAdapter.setLoading(false);
+            if (continueReadingComics.isEmpty()) {
+                homeContinueReadingLayout.setVisibility(View.GONE);
+            } else {
+                homeContinueReadingText.setVisibility(View.VISIBLE);
+                homeContinueReadingLayout.setVisibility(View.VISIBLE);
+            }
             continueReadingAdapter.notifyDataSetChanged();
         });
 
-        ComicRepository.getFavoriteComics(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
-            Log.d("HomeFragment", "Favorite comics fetch complete.");
+        favoritesAdapter.setLoading(true);
+        ComicRepository.getFavoriteComics(FirebaseAuth.getInstance().getCurrentUser().getUid(), 5, comics -> {
             favoriteComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 favoriteComics.addAll(comics);
                 Log.d("HomeFragment", "Favorites size: " + favoriteComics.size());
             }
-            homeFavoritesSliderLayout.setVisibility(favoriteComics.isEmpty() ? View.GONE : View.VISIBLE);
+            favoritesAdapter.setLoading(false);
+            if (favoriteComics.isEmpty()) {
+                homeFavoritesSliderLayout.setVisibility(View.GONE);
+            } else {
+                homeFavoritesText.setVisibility(View.VISIBLE);
+                homeFavoritesSliderLayout.setVisibility(View.VISIBLE);
+            }
+            homeFavoritesText.setVisibility(favoriteComics.isEmpty() ? View.INVISIBLE : View.VISIBLE);
             favoritesAdapter.notifyDataSetChanged();
         });
     }

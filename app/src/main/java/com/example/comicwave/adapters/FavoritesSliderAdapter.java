@@ -26,10 +26,22 @@ public class FavoritesSliderAdapter extends RecyclerView.Adapter<FavoritesSlider
     private Context activityContext;
     private ArrayList<Favorites> favoriteList;
     private int layout;
+    private boolean isLoading = false;
 
     public FavoritesSliderAdapter(ArrayList<Favorites> favoriteList, int layout) {
         this.favoriteList = favoriteList;
         this.layout = layout;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoading) {
+            return R.layout.item_slider_skeleton;
+        }
+        if (position >= favoriteList.size()) {
+            return R.layout.item_slider_placeholder;
+        }
+        return this.layout;
     }
 
     @NonNull
@@ -37,12 +49,20 @@ public class FavoritesSliderAdapter extends RecyclerView.Adapter<FavoritesSlider
     public FavoritesSliderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.activityContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(this.activityContext);
-        View view = inflater.inflate(this.layout, parent, false);
+        View view = inflater.inflate(viewType, parent, false);
+        if (viewType == R.layout.item_slider_skeleton) {
+            return new SkeletonViewHolder(view);
+        } else if (viewType == R.layout.item_slider_placeholder) {
+            return new PlaceholderViewHolder(view);
+        }
         return new FavoritesSliderViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FavoritesSliderViewHolder holder, int position) {
+        if (isLoading || position >= favoriteList.size() || position > 5) {
+            return;
+        }
         Favorites favorite = favoriteList.get(position);
         holder.itemSliderTitle.setText(favorite.getTitle());
         Glide.with(activityContext)
@@ -59,7 +79,12 @@ public class FavoritesSliderAdapter extends RecyclerView.Adapter<FavoritesSlider
 
     @Override
     public int getItemCount() {
-        return favoriteList.size();
+        return 5;
+    }
+
+    public void setLoading(boolean isLoading) {
+        this.isLoading = isLoading;
+        notifyDataSetChanged();
     }
 
     public static class FavoritesSliderViewHolder extends RecyclerView.ViewHolder {
@@ -69,6 +94,18 @@ public class FavoritesSliderAdapter extends RecyclerView.Adapter<FavoritesSlider
             super(itemView);
             this.itemSliderImage = itemView.findViewById(R.id.itemSliderImage);
             this.itemSliderTitle = itemView.findViewById(R.id.itemSliderTitle);
+        }
+    }
+
+    public static class SkeletonViewHolder extends FavoritesSliderViewHolder  {
+        public SkeletonViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    public static class PlaceholderViewHolder extends FavoritesSliderViewHolder {
+        public PlaceholderViewHolder(View itemView) {
+            super(itemView);
         }
     }
 

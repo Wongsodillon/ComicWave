@@ -4,6 +4,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.comicwave.ComicDetailsActivity;
+import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.ComicDetails;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class ComicRepository {
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private static CollectionReference comicRef = db.collection("comic");
+    public static CollectionReference comicRef = db.collection("comic");
     private static HashMap<String, ComicDetails> cachedComicDetails = new HashMap<>();
     private static HashMap<String, ArrayList<Comic>> cachedScheduleData = new HashMap<>();
     public static void getAllComics(String userId, OnFinishListener<ArrayList<Comic>> listener) {
@@ -47,14 +48,17 @@ public class ComicRepository {
 
     public static void searchComics(String query, OnFinishListener<ArrayList<Comic>> listener) {
         ArrayList<Comic> comics = new ArrayList<>();
-        comicRef.orderBy("title").startAt(query)
-                .endAt(query + "\uf8ff")
+        comicRef
+//                .orderBy("title")
+//                .startAt(query)
+//                .endAt(query + "\uf8ff")
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     for (DocumentSnapshot snapshot: snapshots) {
                         Comic comic = documentToComic(snapshot);
-//                        Log.d("Query Result", comic.getAuthor());
-                        comics.add(comic);
+                        if (comic.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                            comics.add(comic);
+                        }
                     }
                     listener.onFinish(comics);
                 });
@@ -105,6 +109,25 @@ public class ComicRepository {
             }
             listener.onFinish(favorites);
         }).addOnFailureListener(e -> {
+            listener.onFinish(null);
+        });
+    }
+
+    public static void getFavoriteComics(String userId, Integer limit, OnFinishListener<ArrayList<Favorites>> listener) {
+        CollectionReference favoriteRef = UserRepository.userRef.document(userId).collection("favorites");
+        ArrayList<Favorites> favorites = new ArrayList<>();
+        favoriteRef
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(limit)
+                .get().addOnSuccessListener(snapshots -> {
+            for (DocumentSnapshot snapshot : snapshots) {
+                Favorites favorite = documentToFavorites(snapshot);
+                favorites.add(favorite);
+                Log.d("Favorite New", favorite.getComicId());
+            }
+            listener.onFinish(favorites);
+        }).addOnFailureListener(e -> {
+            listener.onFinish(null);
         });
     }
 
@@ -142,10 +165,6 @@ public class ComicRepository {
     }
 
     public static void getComicDetailsByID(String comicId, String userId, OnFinishListener<ComicDetails> listener) {
-        if (cachedComicDetails != null && cachedComicDetails.containsKey(comicId)) {
-            listener.onFinish(cachedComicDetails.get(comicId));
-            return;
-        }
         DocumentReference docs = comicRef.document(comicId);
         docs.get().addOnSuccessListener(snapshot -> {
             if (snapshot != null && snapshot.exists()) {
@@ -165,7 +184,6 @@ public class ComicRepository {
             listener.onFinish(null);
         });
     }
-
     public static void getWhereYouLeftOff(String comicId, String userId, OnFinishListener<Episode> listener) {
         DocumentReference docs = UserRepository.userRef.document(userId).collection("viewingHistory").document(comicId);
         docs.get().addOnSuccessListener(snapshot -> {
@@ -215,7 +233,9 @@ public class ComicRepository {
 
                 });
     }
+    public static void updateRating(String comicId, double rating, OnFinishListener<Boolean> listener) {
 
+    }
     public static Episode documentToEpisode(DocumentSnapshot docs) {
         Episode episode = new Episode();
         episode.setEpisodeId(docs.getId());

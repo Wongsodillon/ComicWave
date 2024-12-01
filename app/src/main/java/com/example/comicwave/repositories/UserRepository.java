@@ -7,9 +7,11 @@ import com.example.comicwave.SignUpActivity;
 import com.example.comicwave.database.ComicWaveDB;
 import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
+import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -67,6 +69,62 @@ public class UserRepository {
             listener.onFinish(null);
         });
     }
+    public static void addToFavorites(String comicId, String title, String imageUrl, OnFinishListener<Boolean> listener) {
+        DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
+        Favorites favorites = new Favorites(comicId, title, imageUrl);
+        HashMap<String, Object> favoritesData = favorites.getMappedData();
+        docs.collection("favorites")
+                .document(comicId)
+                .set(favoritesData)
+                .addOnCompleteListener(e -> {
+                    if (e.isSuccessful()) {
+                        listener.onFinish(true);
+                    } else {
+                        listener.onFinish(false);
+                    }
+                });
+    }
+    public static void removeFromFavorites(String comicId, OnFinishListener<Boolean> listener) {
+        DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
+        docs.collection("favorites").document(comicId)
+                .delete()
+                .addOnSuccessListener(e -> {
+                    listener.onFinish(true);
+                })
+                .addOnFailureListener(e -> {
+                    listener.onFinish(false);
+                });
+    }
+
+    public static void addRating(String comicId, double rating, OnFinishListener<Boolean> listener) {
+        DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid())
+                .collection("ratings")
+                .document(comicId);
+        DocumentReference comicDocs = ComicRepository.comicRef.document(comicId);
+        docs.get().addOnSuccessListener(task -> {
+            if (task.exists() && rating == 0.0) {
+                docs.delete()
+                        .addOnSuccessListener(e -> {
+                            listener.onFinish(true);
+                        }).addOnFailureListener(e -> {
+                            listener.onFinish(false);
+                        });
+            }
+            else {
+                HashMap<String, Object> ratingData = new HashMap<>();
+                ratingData.put("createdAt", Timestamp.now());
+                ratingData.put("rating", rating);
+                docs.set(ratingData).addOnCompleteListener(e -> {
+                    listener.onFinish(true);
+                }).addOnSuccessListener(e -> {
+                    listener.onFinish(false);
+                });
+            }
+        }).addOnFailureListener(e -> {
+            listener.onFinish(false);
+        });
+    }
+
     public static void signUp(String fullName, String email, String password, OnFinishListener<Boolean> listener) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {

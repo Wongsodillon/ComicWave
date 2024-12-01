@@ -86,6 +86,7 @@
                     android:textSize="14sp" />
             </LinearLayout>
             <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/detailIcons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
@@ -94,6 +95,7 @@
                 app:alignItems="center"
                 android:paddingHorizontal="16dp"
                 app:layout_collapseMode="none"
+                android:visibility="invisible"
                 >
                 <ImageView
                     android:layout_width="24dp"
@@ -145,6 +147,36 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/detailDescriptionSkeleton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    >
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="18dp"
+                        android:background="@color/gray"
+                        android:layout_marginBottom="8dp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="18dp"
+                        android:background="@color/gray"
+                        android:layout_marginBottom="8dp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="18dp"
+                        android:background="@color/gray"
+                        android:layout_marginBottom="8dp" />
+                    <View
+                        android:layout_width="240dp"
+                        android:layout_height="18dp"
+                        android:background="@color/gray"/>
+                </LinearLayout>
+            </com.facebook.shimmer.ShimmerFrameLayout>
             <TextView
                 android:id="@+id/detailDescription"
                 android:layout_width="match_parent"
@@ -166,14 +198,15 @@
                 android:layout_marginTop="16dp"
                 >
                 <LinearLayout
+                    android:id="@+id/detailFavoriteButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="8dp">
+                    android:paddingVertical="8dp">
                     <ImageView
-                        android:id="@+id/detailFavoriteButton"
+                        android:id="@+id/detailFavoriteIcon"
                         android:layout_width="32dp"
                         android:layout_height="40dp"
                         android:backgroundTint="@color/white"
@@ -188,19 +221,20 @@
                         android:text="Favorite"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"
+                        android:minWidth="75dp"
+                        android:ellipsize="end"
                         android:gravity="center" />
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/detailRatingButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-
                     android:gravity="center"
-                    android:padding="8dp">
+                    android:paddingVertical="8dp">
                     <ImageView
-                        android:id="@+id/detailRatingButton"
+                        android:id="@+id/detailRatingIcon"
                         android:layout_width="36dp"
                         android:layout_height="40dp"
                         android:backgroundTint="@color/white"
@@ -215,18 +249,18 @@
                         android:text="Rating"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"
+                        android:minWidth="75dp"
                         android:gravity="center" />
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/detailShareButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="8dp"
                     android:gravity="center"
-                    android:padding="8dp">
+                    android:paddingVertical="8dp">
                     <ImageView
-                        android:id="@+id/detailShareButton"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:backgroundTint="@color/white"
@@ -241,9 +275,28 @@
                         android:text="Share"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"
+                        android:minWidth="75dp"
                         android:gravity="center" />
                 </LinearLayout>
             </com.google.android.flexbox.FlexboxLayout>
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/detailEpisodeSkeletonLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                    <include layout="@layout/item_episode_skeleton"/>
+                </LinearLayout>
+            </com.facebook.shimmer.ShimmerFrameLayout>
             <LinearLayout
                 android:id="@+id/detailWhereYouLeftOffLayout"
                 android:layout_width="match_parent"
@@ -292,13 +345,14 @@
                     </LinearLayout>
                 </com.google.android.flexbox.FlexboxLayout>
             </LinearLayout>
-
             <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/detailEpisodeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:alignItems="center"
                 app:justifyContent="space_between"
                 android:layout_marginTop="24dp"
+                android:visibility="invisible"
                 >
                 <TextView
                     android:id="@+id/detailEpisodeText"

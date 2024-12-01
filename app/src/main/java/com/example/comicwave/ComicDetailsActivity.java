@@ -23,31 +23,39 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.comicwave.adapters.EpisodeAdapter;
+import com.example.comicwave.fragments.ratingSheet.RatingSheetFragment;
 import com.example.comicwave.helpers.DateHelper;
 import com.example.comicwave.helpers.NumberHelper;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.ComicDetails;
 import com.example.comicwave.models.Episode;
 import com.example.comicwave.repositories.ComicRepository;
+import com.example.comicwave.repositories.UserRepository;
+import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class ComicDetailsActivity extends AppCompatActivity {
+public class ComicDetailsActivity extends AppCompatActivity implements RatingSheetFragment.RatingSheetListener {
 
     private Toolbar toolbar;
-    private ImageView detailImage, detailFavoriteButton, detailWhereYouLeftOffImage;
+    private ImageView detailImage, detailWhereYouLeftOffImage, detailFavoriteIcon, detailRatingIcon;
     private TextView detailTitle, detailGenres, detailViews, detailFavorites, detailRating, detailDescription, detailAuthor,
             detailRatingText, detailFavoriteText, detailWhereYouLeftOffTitle, detailWhereYouLeftOffReleaseDate, detailEpisodeText;
     private Button detailSortByButton;
-    private LinearLayout detailWhereYouLeftOffLayout;
+    private LinearLayout detailWhereYouLeftOffLayout, detailRatingButton, detailShareButton, detailFavoriteButton;
+    private FlexboxLayout detailEpisodeLayout, detailIcons;
+    private ShimmerFrameLayout detailEpisodeSkeletonLayout, detailDescriptionSkeleton;
     private String comicId;
     private ComicDetails comic;
     private ArrayList<Episode> episodes;
     private RecyclerView detailEpisodesList;
     String selected;
+    Boolean isFavorited = false;
+    double userRating;
     private EpisodeAdapter adapter;
     private void initComponents() {
         toolbar = findViewById(R.id.detailToolbar);
@@ -70,8 +78,8 @@ public class ComicDetailsActivity extends AppCompatActivity {
         detailAuthor = findViewById(R.id.detailAuthor);
         detailFavoriteText = findViewById(R.id.detailFavoriteText);
         detailRatingText = findViewById(R.id.detailRatingText);
-        detailFavoriteButton = findViewById(R.id.detailFavoriteButton);
-
+        detailIcons = findViewById(R.id.detailIcons);
+        detailDescriptionSkeleton = findViewById(R.id.detailDescriptionSkeleton);
 
         detailWhereYouLeftOffLayout = findViewById(R.id.detailWhereYouLeftOffLayout);
         detailWhereYouLeftOffImage = findViewById(R.id.detailWhereYouLeftOffImage);
@@ -81,6 +89,9 @@ public class ComicDetailsActivity extends AppCompatActivity {
         detailSortByButton = findViewById(R.id.detailSortByButton);
         selected = detailSortByButton.getText().toString();
 
+        detailEpisodeLayout = findViewById(R.id.detailEpisodeLayout);
+        detailEpisodeSkeletonLayout = findViewById(R.id.detailEpisodeSkeletonLayout);
+
         detailEpisodeText = findViewById(R.id.detailEpisodeText);
         detailEpisodesList = findViewById(R.id.detailEpisodesList);
         episodes = new ArrayList<>();
@@ -88,6 +99,11 @@ public class ComicDetailsActivity extends AppCompatActivity {
         detailEpisodesList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         detailEpisodesList.setAdapter(adapter);
 
+        detailFavoriteButton = findViewById(R.id.detailFavoriteButton);
+        detailRatingButton = findViewById(R.id.detailRatingButton);
+        detailShareButton = findViewById(R.id.detailShareButton);
+        detailFavoriteIcon = findViewById(R.id.detailFavoriteIcon);
+        detailRatingIcon = findViewById(R.id.detailRatingIcon);
     }
 
     @Override
@@ -112,16 +128,20 @@ public class ComicDetailsActivity extends AppCompatActivity {
         detailFavorites.setText(NumberHelper.format(comic.getTotalFavorites()));
         detailRating.setText(String.valueOf(comic.getRating()));
         detailDescription.setText(comic.getDescription());
+        detailDescriptionSkeleton.setVisibility(View.GONE);
         detailAuthor.setText(String.format("Written by: %s", comic.getAuthor()));
 
         Glide.with(this).load(comic.getImageUrl()).into(detailImage);
 
+        detailIcons.setVisibility(View.VISIBLE);
+
         if (isFavorited) {
-            detailFavoriteButton.setImageResource(R.drawable.heart_icon_filled);
+            detailFavoriteIcon.setImageResource(R.drawable.heart_icon_filled);
             detailFavoriteText.setText(String.valueOf("In Favorites"));
         }
         if (userRating != 0.0) {
-            detailRatingText.setText(String.valueOf(userRating));
+            detailRatingIcon.setImageResource(R.drawable.star_icon);
+            detailRatingText.setText(String.format("%.1f/5", userRating));
         }
 
         detailSortByButton.setOnClickListener(e -> {
@@ -151,6 +171,50 @@ public class ComicDetailsActivity extends AppCompatActivity {
         });
 
     }
+    private void initializeButtons() {
+        detailFavoriteIcon.setImageResource(isFavorited ? R.drawable.heart_icon_filled : R.drawable.heart_icon_outline);
+        detailFavoriteText.setText(isFavorited ? "In Favorites" : "Favorite");
+
+        detailFavoriteButton.setOnClickListener(e -> {
+            isFavorited = !isFavorited;
+            detailFavoriteIcon.setImageResource(isFavorited ? R.drawable.heart_icon_filled : R.drawable.heart_icon_outline);
+            detailFavoriteText.setText(isFavorited ? "In Favorites" : "Favorite");
+            if (isFavorited) {
+                UserRepository.addToFavorites(comicId, comic.getComic().getTitle(), comic.getComic().getImageUrl(), success -> {
+                    if (success) {
+                        Log.d("Favorite", "Added to favorites");
+                    } else {
+                        Log.d("Favorite", "Failed to add to favorites");
+                        isFavorited = false;
+                        detailFavoriteIcon.setImageResource(R.drawable.heart_icon_outline);
+                        detailFavoriteText.setText("Favorite");
+                    }
+                });
+            } else {
+                UserRepository.removeFromFavorites(comicId, success -> {
+                    if (success) {
+                        Log.d("Favorite", "Removed from favorites");
+                    } else {
+                        Log.d("Favorite", "Failed to remove from favorites");
+                        isFavorited = true;
+                        detailFavoriteIcon.setImageResource(R.drawable.heart_icon_filled);
+                        detailFavoriteText.setText("In Favorites");
+                    }
+                });
+            }
+        });
+
+        detailRatingButton.setOnClickListener(e -> {
+            Log.d("ComicDetails", "Rated CLick");
+            RatingSheetFragment ratingSheetFragment = RatingSheetFragment.newInstance();
+            Bundle args = new Bundle();
+            args.putString("comicTitle", comic.getComic().getTitle());
+            args.putString("comicImage", comic.getComic().getImageUrl());
+            args.putDouble("userRating", comic.getRating());
+            ratingSheetFragment.setArguments(args);
+            ratingSheetFragment.show(getSupportFragmentManager(), ratingSheetFragment.getTag());
+        });
+    }
 
     private void populateWhereYouLeftOff(Episode episode) {
         detailWhereYouLeftOffLayout.setVisibility(View.VISIBLE);
@@ -170,7 +234,10 @@ public class ComicDetailsActivity extends AppCompatActivity {
         ComicRepository.getComicDetailsByID(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
             if (result != null) {
                 comic = result;
-                populateUI(comic.getComic(), comic.getFavorited(), comic.getRating());
+                isFavorited = comic.getFavorited();
+                userRating = comic.getRating();
+                populateUI(comic.getComic(), isFavorited, userRating);
+                initializeButtons();
             } else {
                 Toast.makeText(this, "Comic not found!", Toast.LENGTH_SHORT).show();
                 new android.os.Handler().postDelayed(this::finish, 500);
@@ -190,10 +257,29 @@ public class ComicDetailsActivity extends AppCompatActivity {
         ComicRepository.getAllEpisodes(comicId, result -> {
             episodes.clear();
             episodes.addAll(result);
+            detailEpisodeLayout.setVisibility(View.VISIBLE);
+            detailEpisodeSkeletonLayout.setVisibility(View.GONE);
             detailEpisodeText.setText(String.format("Episodes (%d)", episodes.size()));
             adapter.notifyDataSetChanged();
         });
 
 
+    }
+    @Override
+    public void onRatingSubmitted(double rating) {
+        if (rating == 0.0 && userRating == 0.0) {
+            return;
+        }
+        UserRepository.addRating(comic.getComic().getId(), rating, isSuccess -> {
+            if (isSuccess && rating == 0.0) {
+                detailRatingIcon.setImageResource(R.drawable.star_outline_icon);
+                detailRatingText.setText("Rating");
+            } else if (isSuccess && rating != 0.0) {
+                detailRatingIcon.setImageResource(R.drawable.star_icon);
+                detailRatingText.setText(String.format("%.1f/5", rating));
+            } else {
+                Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT);
+            }
+        });
     }
 }

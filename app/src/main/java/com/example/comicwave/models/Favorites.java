@@ -2,6 +2,8 @@ package com.example.comicwave.models;
 
 import com.google.firebase.Timestamp;
 
+import java.util.HashMap;
+
 public class Favorites {
     private String comicId;
     private String title;
@@ -16,7 +18,19 @@ public class Favorites {
         this.imageUrl = imageUrl;
         this.timestamp = timestamp;
     }
-
+    public Favorites(String comicId, String title, String imageUrl) {
+        this.comicId = comicId;
+        this.title = title;
+        this.imageUrl = imageUrl;
+        this.timestamp = Timestamp.now();
+    }
+    public HashMap<String, Object> getMappedData() {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("title", title);
+        data.put("imageUrl", imageUrl);
+        data.put("createdAt", timestamp);
+        return data;
+    }
     public String getComicId() {
         return comicId;
     }

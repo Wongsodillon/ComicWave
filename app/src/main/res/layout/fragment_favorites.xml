@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.schedule.ScheduleFragment">
+    tools:context=".fragments.favorites.FavoritesFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -12,7 +13,7 @@
         android:background="@color/primary"
         >
         <LinearLayout
-            android:id="@+id/scheduleTabLayout"
+            android:id="@+id/favoritesTabLayout"
             android:layout_width="match_parent"
             android:background="@color/primary"
             android:layout_height="wrap_content"
@@ -27,66 +28,36 @@
                 android:textSize="20sp"
                 android:textColor="@color/white"
                 android:fontFamily="@font/poppins_semi_bold"
-                android:text="Schedule" />
+                android:text="Favorites" />
 
             <com.google.android.material.tabs.TabLayout
-                android:id="@+id/scheduleTab"
+                android:id="@+id/favoritesTab"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/primary"
                 app:tabIndicatorColor="@color/white"
-                app:tabMode="scrollable"
+                app:tabMode="fixed"
+                app:tabGravity="fill"
                 app:tabSelectedTextColor="@color/white"
                 app:tabTextColor="@color/white">
-
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Monday" />
-
+                    android:text="Favorites" />
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tuesday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Wednesday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thursday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Friday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Saturday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sunday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Daily" />
+                    android:text="Read List" />
             </com.google.android.material.tabs.TabLayout>
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/scheduleRecyclerView"
+        android:id="@+id/favoritesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_marginTop="16dp" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout >

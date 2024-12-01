@@ -25,10 +25,15 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
     private final int layout;
     private final ArrayList<ViewingHistory> viewingHistories;
     private Context activityContext;
+    private boolean isLoading = false;
 
     public ViewingHistoryAdapter(ArrayList<ViewingHistory> viewingHistories, int layout) {
         this.viewingHistories = viewingHistories;
         this.layout = layout;
+    }
+
+    public int getItemViewType(int position) {
+        return isLoading ? R.layout.item_slider_skeleton : this.layout;
     }
 
     @NonNull
@@ -36,12 +41,18 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
     public ViewingHistoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.activityContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(activityContext);
-        View view = inflater.inflate(this.layout, parent, false);
+        View view = inflater.inflate(viewType, parent, false);
+        if (viewType == R.layout.item_slider_skeleton) {
+            return new SkeletonViewHolder(view);
+        }
         return new ViewingHistoryViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewingHistoryViewHolder holder, int position) {
+        if (isLoading) {
+            return;
+        }
         ViewingHistory comic = viewingHistories.get(position);
         holder.itemSliderTitle.setText(comic.getComicTitle());
         Glide.with(activityContext)
@@ -57,7 +68,12 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
 
     @Override
     public int getItemCount() {
-        return viewingHistories.size();
+        return isLoading ? 5 : viewingHistories.size();
+    }
+
+    public void setLoading(boolean isLoading) {
+        this.isLoading = isLoading;
+        notifyDataSetChanged();
     }
 
     public static class ViewingHistoryViewHolder extends RecyclerView.ViewHolder {
@@ -67,6 +83,11 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
             super(itemView);
             this.itemSliderImage = itemView.findViewById(R.id.itemSliderImage);
             this.itemSliderTitle = itemView.findViewById(R.id.itemSliderTitle);
+        }
+    }
+    public static class SkeletonViewHolder extends ViewingHistoryViewHolder {
+        public SkeletonViewHolder(View itemView) {
+            super(itemView);
         }
     }
 }
