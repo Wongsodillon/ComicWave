@@ -29,9 +29,13 @@ public class ComicRepository {
     public static CollectionReference comicRef = db.collection("comic");
     private static HashMap<String, ComicDetails> cachedComicDetails = new HashMap<>();
     private static HashMap<String, ArrayList<Comic>> cachedScheduleData = new HashMap<>();
-    public static void getAllComics(String userId, OnFinishListener<ArrayList<Comic>> listener) {
+    public static void getMostFavorited(OnFinishListener<ArrayList<Comic>> listener) {
         ArrayList<Comic> comics = new ArrayList<>();
-        comicRef.get().addOnSuccessListener(querySnapshot -> {
+        comicRef
+                .limit(10)
+                .orderBy("totalFavorites", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
             for (DocumentSnapshot document : querySnapshot) {
                 Comic comic = documentToComic(document);
                 if (comic != null) {
@@ -89,7 +93,7 @@ public class ComicRepository {
     }
 
     public static void getFeaturedComic(OnFinishListener<Comic> listener) {
-        DocumentReference docs = comicRef.document("9ITWVdbiycSJpF4oLrXS");
+        DocumentReference docs = comicRef.document("LeZQkfT1RJTNDV2K1aMI");
         docs.get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
                 Comic comic = documentToComic(snapshot);

@@ -45,8 +45,8 @@
                     android:layout_gravity="bottom"
                     android:orientation="vertical"
                     android:paddingHorizontal="16dp"
-                    android:paddingBottom="32dp">
-
+                    android:paddingBottom="32dp"
+                    android:layout_marginEnd="24dp">
                     <TextView
                         android:id="@+id/homeFeaturedTitle"
                         android:layout_width="wrap_content"
@@ -54,16 +54,14 @@
                         android:fontFamily="@font/poppins_semi_bold"
                         android:text=""
                         android:textColor="@android:color/white"
-                        android:textSize="36sp" />
-
+                        android:textSize="32sp" />
                     <TextView
                         android:id="@+id/homeFeaturedGenres"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=""
                         android:textColor="@android:color/white"
-                        android:textSize="16sp" />
-
+                        android:textSize="20sp" />
                 </LinearLayout>
 
             </FrameLayout>
@@ -99,7 +97,6 @@
                     />
             </LinearLayout>
 
-
             <LinearLayout
                 android:id="@+id/homeFavoritesSliderLayout"
                 android:layout_width="match_parent"
@@ -111,22 +108,62 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/homeContinueReadingLayout">
 
-                <TextView
+                <com.google.android.flexbox.FlexboxLayout
                     android:id="@+id/homeFavoritesText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="16dp"
+                    android:visibility="invisible"
+                    app:justifyContent="space_between"
+                    app:alignItems="center"
+                    >
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:fontFamily="@font/poppins_semi_bold"
+                        android:text="Favorites" />
+                    <ImageView
+                        android:id="@+id/homeFavoritesMore"
+                        android:layout_width="32dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/arrow_right_icon"
+                        />
+                </com.google.android.flexbox.FlexboxLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/homeFavoritesSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/homeMostFavoritesLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/homeFavoritesSliderLayout">
+
+                <TextView
+                    android:id="@+id/homeMostFavoritesText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
                     android:textSize="24sp"
                     android:visibility="invisible"
                     android:fontFamily="@font/poppins_semi_bold"
-                    android:text="Favorites" />
+                    android:text="Comic with most favorites" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/homeFavoritesSlider"
+                    android:id="@+id/homeMostFavoritesSlider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
+                    android:nestedScrollingEnabled="false"
+                    />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

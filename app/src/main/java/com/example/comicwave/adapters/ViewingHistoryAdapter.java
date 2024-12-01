@@ -32,6 +32,7 @@ public class ViewingHistoryAdapter extends RecyclerView.Adapter<ViewingHistoryAd
         this.layout = layout;
     }
 
+    @Override
     public int getItemViewType(int position) {
         return isLoading ? R.layout.item_slider_skeleton : this.layout;
     }

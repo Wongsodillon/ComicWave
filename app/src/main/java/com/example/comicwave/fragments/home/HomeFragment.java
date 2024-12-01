@@ -1,5 +1,6 @@
 package com.example.comicwave.fragments.home;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,24 +25,31 @@ import com.example.comicwave.R;
 import com.example.comicwave.adapters.ComicSliderAdapter;
 import com.example.comicwave.adapters.FavoritesSliderAdapter;
 import com.example.comicwave.adapters.ViewingHistoryAdapter;
+import com.example.comicwave.fragments.favorites.FavoritesFragment;
+import com.example.comicwave.fragments.schedule.ScheduleFragment;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.ViewingHistory;
 import com.example.comicwave.repositories.ComicRepository;
+import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
-    private RecyclerView homeContinueReadingSlider, homeFavoritesSlider;
+    private RecyclerView homeContinueReadingSlider, homeFavoritesSlider, homeMostFavoritesSlider;
     private ArrayList<ViewingHistory> continueReadingComics;
     private ArrayList<Favorites> favoriteComics;
+    private ArrayList<Comic> mostFavoritesComics;
     private ViewingHistoryAdapter continueReadingAdapter;
     private FavoritesSliderAdapter favoritesAdapter;
-    private ImageView homeFeaturedImage;
-    private TextView homeFeaturedTitle, homeFeaturedGenres, homeContinueReadingText, homeFavoritesText;
-    private LinearLayout homeContinueReadingLayout, homeFavoritesSliderLayout;
+    private ComicSliderAdapter mostFavoritesAdapter;
+    private ImageView homeFeaturedImage, homeFavoritesMore;
+    private TextView homeFeaturedTitle, homeFeaturedGenres, homeContinueReadingText, homeMostFavoritesText;
+    private LinearLayout homeContinueReadingLayout, homeFavoritesSliderLayout, homeMostFavoritesLayout;
+    private FlexboxLayout homeFavoritesText;
 
     @Nullable
     @Override
@@ -62,12 +71,22 @@ public class HomeFragment extends Fragment {
         homeFavoritesSlider = view.findViewById(R.id.homeFavoritesSlider);
         homeContinueReadingLayout = view.findViewById(R.id.homeContinueReadingLayout);
         homeFavoritesSliderLayout = view.findViewById(R.id.homeFavoritesSliderLayout);
-
         homeFavoritesText = view.findViewById(R.id.homeFavoritesText);
+
+        homeMostFavoritesLayout = view.findViewById(R.id.homeMostFavoritesLayout);
+        homeMostFavoritesSlider = view.findViewById(R.id.homeMostFavoritesSlider);
+        homeMostFavoritesText = view.findViewById(R.id.homeMostFavoritesText);
         homeContinueReadingText = view.findViewById(R.id.homeContinueReadingText);
 
+        homeFavoritesMore = view.findViewById(R.id.homeFavoritesMore);
+        homeFavoritesMore.setOnClickListener(e -> {
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new ScheduleFragment())
+                    .commit();
+            BottomNavigationView navigationBar = requireActivity().findViewById(R.id.bottom_navigation);
+            navigationBar.setSelectedItemId(R.id.navigation_favorites);
+        });
     }
-
     private void setupAdapters() {
         continueReadingComics = new ArrayList<>();
         continueReadingAdapter = new ViewingHistoryAdapter(continueReadingComics, R.layout.item_slider);
@@ -78,6 +97,11 @@ public class HomeFragment extends Fragment {
         favoritesAdapter = new FavoritesSliderAdapter(favoriteComics, R.layout.item_slider);
         homeFavoritesSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         homeFavoritesSlider.setAdapter(favoritesAdapter);
+
+        mostFavoritesComics = new ArrayList<>();
+        mostFavoritesAdapter = new ComicSliderAdapter(mostFavoritesComics, R.layout.item_best_comics);
+        homeMostFavoritesSlider.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        homeMostFavoritesSlider.setAdapter(mostFavoritesAdapter);
     }
 
     private void fetchData() {
@@ -120,6 +144,21 @@ public class HomeFragment extends Fragment {
             }
             homeFavoritesText.setVisibility(favoriteComics.isEmpty() ? View.INVISIBLE : View.VISIBLE);
             favoritesAdapter.notifyDataSetChanged();
+        });
+
+        mostFavoritesAdapter.setLoading(true);
+        ComicRepository.getMostFavorited(comics -> {
+            mostFavoritesComics.clear();
+            mostFavoritesComics.addAll(comics);
+            mostFavoritesAdapter.setLoading(false);
+            if (mostFavoritesComics.isEmpty()) {
+                homeMostFavoritesLayout.setVisibility(View.GONE);
+            } else {
+                homeMostFavoritesText.setVisibility(View.VISIBLE);
+                homeMostFavoritesLayout.setVisibility(View.VISIBLE);
+            }
+            homeMostFavoritesText.setVisibility(mostFavoritesComics.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+            mostFavoritesAdapter.notifyDataSetChanged();
         });
     }
 }

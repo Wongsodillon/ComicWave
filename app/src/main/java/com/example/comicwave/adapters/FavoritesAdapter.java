@@ -1,6 +1,7 @@
 package com.example.comicwave.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.comicwave.ComicDetailsActivity;
 import com.example.comicwave.R;
 import com.example.comicwave.models.Favorites;
 
@@ -62,6 +64,11 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
                 .apply(RequestOptions.bitmapTransform(new RoundedCorners(8)))
                 .into(holder.itemFavoritesImage);
         holder.itemFavoritesTitle.setText(f.getTitle());
+        holder.itemView.setOnClickListener(e -> {
+            Intent i = new Intent(activityContext, ComicDetailsActivity.class);
+            i.putExtra("comicId", f.getComicId());
+            activityContext.startActivity(i);
+        });
     }
 
     @Override
