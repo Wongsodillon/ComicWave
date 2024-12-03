@@ -42,11 +42,12 @@ import java.util.Comparator;
 public class ComicDetailsActivity extends AppCompatActivity implements RatingSheetFragment.RatingSheetListener {
 
     private Toolbar toolbar;
-    private ImageView detailImage, detailWhereYouLeftOffImage, detailFavoriteIcon, detailRatingIcon;
+    private ImageView detailImage, detailWhereYouLeftOffImage, detailFavoriteIcon, detailReadlistIcon, detailRatingIcon;
     private TextView detailTitle, detailGenres, detailViews, detailFavorites, detailRating, detailDescription, detailAuthor,
-            detailRatingText, detailFavoriteText, detailWhereYouLeftOffTitle, detailWhereYouLeftOffReleaseDate, detailEpisodeText;
+            detailRatingText, detailFavoriteText, detailWhereYouLeftOffTitle, detailReadlistText,
+            detailWhereYouLeftOffReleaseDate,  detailEpisodeText;
     private Button detailSortByButton;
-    private LinearLayout detailWhereYouLeftOffLayout, detailRatingButton, detailShareButton, detailFavoriteButton;
+    private LinearLayout detailWhereYouLeftOffLayout, detailRatingButton, detailReadlistButton, detailShareButton, detailFavoriteButton;
     private FlexboxLayout detailEpisodeLayout, detailIcons;
     private ShimmerFrameLayout detailEpisodeSkeletonLayout, detailDescriptionSkeleton;
     private String comicId;
@@ -55,6 +56,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
     private RecyclerView detailEpisodesList;
     String selected;
     Boolean isFavorited = false;
+    Boolean isReadListed = false;
     double userRating;
     private EpisodeAdapter adapter;
     private void initComponents() {
@@ -104,6 +106,9 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         detailShareButton = findViewById(R.id.detailShareButton);
         detailFavoriteIcon = findViewById(R.id.detailFavoriteIcon);
         detailRatingIcon = findViewById(R.id.detailRatingIcon);
+        detailReadlistText = findViewById(R.id.detailReadlistText);
+        detailReadlistIcon = findViewById(R.id.detailReadlistIcon);
+        detailReadlistButton = findViewById(R.id.detailReadlistButton);
     }
 
     @Override
@@ -121,7 +126,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         fetchData();
     }
 
-    private void populateUI(Comic comic, Boolean isFavorited, Double userRating) {
+    private void populateUI(Comic comic, Boolean isFavorited, Double userRating, Boolean isReadListed) {
         detailTitle.setText(comic.getTitle());
         detailGenres.setText(String.join(", ", comic.getGenres()));
         detailViews.setText(NumberHelper.format(comic.getTotalViews()));
@@ -139,6 +144,12 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             detailFavoriteIcon.setImageResource(R.drawable.heart_icon_filled);
             detailFavoriteText.setText(String.valueOf("In Favorites"));
         }
+
+        if (isReadListed) {
+            detailReadlistIcon.setImageResource(R.drawable.added_icon);
+            detailReadlistText.setText("Added");
+        }
+
         if (userRating != 0.0) {
             detailRatingIcon.setImageResource(R.drawable.star_icon);
             detailRatingText.setText(String.format("%.1f/5", userRating));
@@ -204,6 +215,35 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             }
         });
 
+        detailReadlistButton.setOnClickListener(e -> {
+            isReadListed = !isReadListed;
+            detailReadlistIcon.setImageResource(isReadListed ? R.drawable.added_icon : R.drawable.add_icon);
+            detailReadlistText.setText(isReadListed ? "Added" : "Readlist");
+            if (isReadListed) {
+                UserRepository.addToReadList(comicId, comic.getComic().getTitle(), comic.getComic().getImageUrl(), success -> {
+                    if (success) {
+                        Log.d("ReadList", "Added");
+                    } else {
+                        Log.d("ReadList", "Failed to add to favorites");
+                        isReadListed = false;
+                        detailReadlistIcon.setImageResource(R.drawable.add_icon);
+                        detailReadlistText.setText("Readlist");
+                    }
+                });
+            } else {
+                UserRepository.removeFromReadList(comicId, success -> {
+                    if (success) {
+                        Log.d("ReadList", "Removed from favorites");
+                    } else {
+                        Log.d("ReadList", "Failed to remove from favorites");
+                        isReadListed = true;
+                        detailReadlistIcon.setImageResource(R.drawable.added_icon);
+                        detailReadlistText.setText("Added");
+                    }
+                });
+            }
+        });
+
         detailRatingButton.setOnClickListener(e -> {
             Log.d("ComicDetails", "Rated CLick");
             RatingSheetFragment ratingSheetFragment = RatingSheetFragment.newInstance();
@@ -214,6 +254,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             ratingSheetFragment.setArguments(args);
             ratingSheetFragment.show(getSupportFragmentManager(), ratingSheetFragment.getTag());
         });
+
     }
 
     private void populateWhereYouLeftOff(Episode episode) {
@@ -236,7 +277,8 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
                 comic = result;
                 isFavorited = comic.getFavorited();
                 userRating = comic.getRating();
-                populateUI(comic.getComic(), isFavorited, userRating);
+                isReadListed = comic.getReadListed();
+                populateUI(comic.getComic(), isFavorited, userRating, isReadListed);
                 initializeButtons();
             } else {
                 Toast.makeText(this, "Comic not found!", Toast.LENGTH_SHORT).show();

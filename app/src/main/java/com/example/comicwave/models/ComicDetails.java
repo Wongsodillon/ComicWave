@@ -7,16 +7,18 @@ public class ComicDetails {
     private ArrayList<Episode> episodes;
     private Boolean isFavorited;
     private Double rating;
+    private Boolean isReadListed;
     public ComicDetails(Comic comic, ArrayList<Episode> episodes, Boolean isFavorited, Double rating) {
         this.comic = comic;
         this.episodes = episodes;
         this.isFavorited = isFavorited;
         this.rating = rating;
     }
-    public ComicDetails(Comic comic, Boolean isFavorited, Double rating) {
+    public ComicDetails(Comic comic, Boolean isFavorited, Double rating, Boolean isReadListed) {
         this.comic = comic;
         this.isFavorited = isFavorited;
         this.rating = rating;
+        this.isReadListed = isReadListed;
     }
 
     public Comic getComic() {
@@ -49,5 +51,13 @@ public class ComicDetails {
 
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+
+    public Boolean getReadListed() {
+        return isReadListed;
+    }
+
+    public void setReadListed(Boolean readListed) {
+        isReadListed = readListed;
     }
 }

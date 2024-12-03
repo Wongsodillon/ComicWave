@@ -31,6 +31,7 @@ import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.ViewingHistory;
 import com.example.comicwave.repositories.ComicRepository;
+import com.example.comicwave.repositories.UserRepository;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,7 +113,7 @@ public class HomeFragment extends Fragment {
         });
 
         continueReadingAdapter.setLoading(true);
-        ComicRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+        UserRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
             continueReadingComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 continueReadingComics.addAll(comics);
@@ -129,7 +130,7 @@ public class HomeFragment extends Fragment {
         });
 
         favoritesAdapter.setLoading(true);
-        ComicRepository.getFavoriteComics(FirebaseAuth.getInstance().getCurrentUser().getUid(), 5, comics -> {
+        UserRepository.getFavoriteComics(5, comics -> {
             favoriteComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 favoriteComics.addAll(comics);

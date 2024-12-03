@@ -4,11 +4,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.comicwave.SignUpActivity;
+import com.example.comicwave.adapters.ReadListAdapter;
 import com.example.comicwave.database.ComicWaveDB;
 import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Favorites;
+import com.example.comicwave.models.ReadList;
 import com.example.comicwave.models.User;
+import com.example.comicwave.models.ViewingHistory;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -18,7 +21,11 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
+import org.checkerframework.checker.units.qual.A;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,6 +76,42 @@ public class UserRepository {
             listener.onFinish(null);
         });
     }
+    public static void getFavoriteComics(OnFinishListener<ArrayList<Favorites>> listener) {
+        CollectionReference favoriteRef = userRef.document(mAuth.getCurrentUser().getUid()).collection("favorites");
+        ArrayList<Favorites> favorites = new ArrayList<>();
+        favoriteRef.get().addOnSuccessListener(snapshots -> {
+            if (snapshots.isEmpty()) {
+                listener.onFinish(null);
+                return;
+            }
+            for (DocumentSnapshot snapshot : snapshots) {
+                Favorites favorite = documentToFavorites(snapshot);
+                favorites.add(favorite);
+                Log.d("Favorite New", favorite.getComicId());
+            }
+            listener.onFinish(favorites);
+        }).addOnFailureListener(e -> {
+            listener.onFinish(null);
+        });
+    }
+
+    public static void getFavoriteComics(Integer limit, OnFinishListener<ArrayList<Favorites>> listener) {
+        CollectionReference favoriteRef = userRef.document(mAuth.getCurrentUser().getUid()).collection("favorites");
+        ArrayList<Favorites> favorites = new ArrayList<>();
+        favoriteRef
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(limit)
+                .get().addOnSuccessListener(snapshots -> {
+                    for (DocumentSnapshot snapshot : snapshots) {
+                        Favorites favorite = documentToFavorites(snapshot);
+                        favorites.add(favorite);
+                        Log.d("Favorite New", favorite.getComicId());
+                    }
+                    listener.onFinish(favorites);
+                }).addOnFailureListener(e -> {
+                    listener.onFinish(null);
+                });
+    }
     public static void addToFavorites(String comicId, String title, String imageUrl, OnFinishListener<Boolean> listener) {
         DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
         Favorites favorites = new Favorites(comicId, title, imageUrl);
@@ -87,6 +130,48 @@ public class UserRepository {
     public static void removeFromFavorites(String comicId, OnFinishListener<Boolean> listener) {
         DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
         docs.collection("favorites").document(comicId)
+                .delete()
+                .addOnSuccessListener(e -> {
+                    listener.onFinish(true);
+                })
+                .addOnFailureListener(e -> {
+                    listener.onFinish(false);
+                });
+    }
+
+    public static void getReadList(OnFinishListener<ArrayList<ReadList>> listener) {
+        CollectionReference readListsRef = userRef.document(mAuth.getCurrentUser().getUid()).collection("readlists");
+        ArrayList<ReadList> readLists = new ArrayList<>();
+        readListsRef.get().addOnSuccessListener(snapshots -> {
+            for (DocumentSnapshot snapshot : snapshots) {
+                readLists.add(documentToReadList(snapshot));
+            }
+            listener.onFinish(readLists);
+        }).addOnFailureListener(e -> {
+            listener.onFinish(null);
+        });
+
+    }
+
+    public static void addToReadList(String comicId, String title, String imageUrl, OnFinishListener<Boolean> listener) {
+        DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
+        ReadList readList = new ReadList(comicId, title, imageUrl);
+        HashMap<String, Object> readListData = readList.getMappedData();
+        docs.collection("readlists")
+                .document(comicId)
+                .set(readListData)
+                .addOnCompleteListener(e -> {
+                   if (e.isSuccessful()) {
+                       listener.onFinish(true);
+                   } else {
+                       listener.onFinish(false);
+                   }
+                });
+    }
+
+    public static void removeFromReadList(String comicId, OnFinishListener<Boolean> listener) {
+        DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
+        docs.collection("readlists").document(comicId)
                 .delete()
                 .addOnSuccessListener(e -> {
                     listener.onFinish(true);
@@ -124,7 +209,102 @@ public class UserRepository {
             listener.onFinish(false);
         });
     }
+    public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
+        CollectionReference viewingHistoryRef = userRef.document(userId).collection("viewingHistory");
+        ArrayList<ViewingHistory> histories = new ArrayList<>();
+        viewingHistoryRef.whereNotEqualTo("nextEpisodeId", "")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots.isEmpty()) {
+                        Log.d("View History", "No viewing history found for user: " + userId);
+                        listener.onFinish(histories);
+                    } else {
+                        for (DocumentSnapshot snapshot : snapshots) {
+                            ViewingHistory vh = documentToViewingHistory(snapshot);
+                            Log.d("View History", vh.getComicTitle());
+                            histories.add(vh);
+                        }
+                        listener.onFinish(histories);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("View History", "Error fetching data", e);
+                });
 
+    }
+
+    public static void checkIfComicIsFavorited(String comicId, String userId, OnFinishListener<Boolean> callback) {
+        DocumentReference favoriteDocs = userRef.document(userId).collection("favorites").document(comicId);
+        favoriteDocs.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                callback.onFinish(true);
+            }
+            else {
+                callback.onFinish(false);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("ComicDetails", "Error checking favorite status: " + comicId);
+            callback.onFinish(false);
+        });
+    }
+    public static void checkUserRating(String comicId, String userId, OnFinishListener<Double> callback) {
+        DocumentReference ratingDoc = userRef.document(userId).collection("ratings").document(comicId);
+        ratingDoc.get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        Double rating = snapshot.getDouble("rating");
+                        callback.onFinish(rating != null ? rating : 0.0);
+                    } else {
+                        callback.onFinish(0.0);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ComicRepository", "Error fetching rating for comic: " + comicId, e);
+                    callback.onFinish(0.0);
+                });
+    }
+
+    public static void checkIfReadListed(String comicId, String userId, OnFinishListener<Boolean> callback) {
+        DocumentReference favoriteDocs = userRef.document(userId).collection("readlists").document(comicId);
+        favoriteDocs.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                callback.onFinish(true);
+            }
+            else {
+                callback.onFinish(false);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("ComicDetails", "Error checking favorite status: " + comicId);
+            callback.onFinish(false);
+        });
+    }
+    public static Favorites documentToFavorites(DocumentSnapshot docs) {
+        Favorites favorites = new Favorites(
+                docs.getId(),
+                (String) docs.get("title"),
+                (String) docs.get("imageUrl"),
+                (Timestamp) docs.get("createdAt")
+        );
+        return favorites;
+    }
+    public static ReadList documentToReadList(DocumentSnapshot docs) {
+        return new ReadList(
+                docs.getId(),
+                (String) docs.get("title"),
+                (String) docs.get("imageUrl"),
+                (Timestamp) docs.get("createdAt")
+        );
+    }
+    public static ViewingHistory documentToViewingHistory(DocumentSnapshot docs) {
+        ViewingHistory viewingHistory = new ViewingHistory();
+        viewingHistory.setLastViewedTimestamp(docs.getTimestamp("lastViewedTimestamp"));
+        viewingHistory.setComicId(docs.getId());
+        viewingHistory.setImageUrl((String) docs.get("imageUrl"));
+        viewingHistory.setComicTitle((String) docs.get("comicTitle"));
+        viewingHistory.setLastViewedEpisodeId((String) docs.get("lastViewedEpisodeId"));
+        viewingHistory.setNextEpisodeId((String) docs.get("nextEpisodeId"));
+        return viewingHistory;
+    }
     public static void signUp(String fullName, String email, String password, OnFinishListener<Boolean> listener) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -162,7 +342,6 @@ public class UserRepository {
                     listener.onFinish(false);
                 });
     }
-
     public static void isUniqueEmail(String email, OnFinishListener<Boolean> listener) {
         userRef.whereEqualTo("email", email.toLowerCase()).get()
                 .addOnSuccessListener(task -> {

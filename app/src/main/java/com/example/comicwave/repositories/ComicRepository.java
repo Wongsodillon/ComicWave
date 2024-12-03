@@ -42,7 +42,6 @@ public class ComicRepository {
                     comics.add(comic);
                 }
             }
-
             listener.onFinish(comics);
 
         }).addOnFailureListener(e -> {
@@ -67,31 +66,6 @@ public class ComicRepository {
                     listener.onFinish(comics);
                 });
     }
-
-    public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
-        CollectionReference viewingHistoryRef = UserRepository.userRef.document(userId).collection("viewingHistory");
-        ArrayList<ViewingHistory> histories = new ArrayList<>();
-        viewingHistoryRef.whereNotEqualTo("nextEpisodeId", "")
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    if (snapshots.isEmpty()) {
-                        Log.d("View History", "No viewing history found for user: " + userId);
-                        listener.onFinish(histories);
-                    } else {
-                        for (DocumentSnapshot snapshot : snapshots) {
-                            ViewingHistory vh = documentToViewingHistory(snapshot);
-                            Log.d("View History", vh.getComicTitle());
-                            histories.add(vh);
-                        }
-                        listener.onFinish(histories);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("View History", "Error fetching data", e);
-                });
-
-    }
-
     public static void getFeaturedComic(OnFinishListener<Comic> listener) {
         DocumentReference docs = comicRef.document("LeZQkfT1RJTNDV2K1aMI");
         docs.get().addOnSuccessListener(snapshot -> {
@@ -101,83 +75,18 @@ public class ComicRepository {
             }
         });
     }
-
-    public static void getFavoriteComics(String userId, OnFinishListener<ArrayList<Favorites>> listener) {
-        CollectionReference favoriteRef = UserRepository.userRef.document(userId).collection("favorites");
-        ArrayList<Favorites> favorites = new ArrayList<>();
-        favoriteRef.get().addOnSuccessListener(snapshots -> {
-            for (DocumentSnapshot snapshot : snapshots) {
-                Favorites favorite = documentToFavorites(snapshot);
-                favorites.add(favorite);
-                Log.d("Favorite New", favorite.getComicId());
-            }
-            listener.onFinish(favorites);
-        }).addOnFailureListener(e -> {
-            listener.onFinish(null);
-        });
-    }
-
-    public static void getFavoriteComics(String userId, Integer limit, OnFinishListener<ArrayList<Favorites>> listener) {
-        CollectionReference favoriteRef = UserRepository.userRef.document(userId).collection("favorites");
-        ArrayList<Favorites> favorites = new ArrayList<>();
-        favoriteRef
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(limit)
-                .get().addOnSuccessListener(snapshots -> {
-            for (DocumentSnapshot snapshot : snapshots) {
-                Favorites favorite = documentToFavorites(snapshot);
-                favorites.add(favorite);
-                Log.d("Favorite New", favorite.getComicId());
-            }
-            listener.onFinish(favorites);
-        }).addOnFailureListener(e -> {
-            listener.onFinish(null);
-        });
-    }
-
-    public static void checkIfComicIsFavorited(String comicId, String userId, OnFinishListener<Boolean> callback) {
-        DocumentReference favoriteDocs = UserRepository.userRef.document(userId).collection("favorites").document(comicId);
-        favoriteDocs.get().addOnSuccessListener(snapshot -> {
-            if (snapshot.exists()) {
-                callback.onFinish(true);
-            }
-            else {
-                callback.onFinish(false);
-            }
-        }).addOnFailureListener(e -> {
-            Log.e("ComicDetails", "Error checking favorite status: " + comicId);
-            callback.onFinish(false);
-        });
-
-    }
-
-    public static void checkUserRating(String comicId, String userId, OnFinishListener<Double> callback) {
-        DocumentReference ratingDoc = UserRepository.userRef.document(userId).collection("ratings").document(comicId);
-        ratingDoc.get()
-                .addOnSuccessListener(snapshot -> {
-                    if (snapshot.exists()) {
-                        Double rating = snapshot.getDouble("rating");
-                        callback.onFinish(rating != null ? rating : 0.0);
-                    } else {
-                        callback.onFinish(0.0);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("ComicRepository", "Error fetching rating for comic: " + comicId, e);
-                    callback.onFinish(0.0);
-                });
-    }
-
     public static void getComicDetailsByID(String comicId, String userId, OnFinishListener<ComicDetails> listener) {
         DocumentReference docs = comicRef.document(comicId);
         docs.get().addOnSuccessListener(snapshot -> {
             if (snapshot != null && snapshot.exists()) {
                 Comic comic = documentToComic(snapshot);
-                checkIfComicIsFavorited(comicId, userId, isFavorited -> {
-                    checkUserRating(comicId, userId, userRating -> {
-                        ComicDetails comicDetails = new ComicDetails(comic, isFavorited, userRating);
-                        cachedComicDetails.put(comicId, comicDetails);
-                        listener.onFinish(comicDetails);
+                UserRepository.checkIfComicIsFavorited(comicId, userId, isFavorited -> {
+                    UserRepository.checkUserRating(comicId, userId, userRating -> {
+                        UserRepository.checkIfReadListed(comicId, userId, isReadListed -> {
+                            ComicDetails comicDetails = new ComicDetails(comic, isFavorited, userRating, isReadListed);
+                            cachedComicDetails.put(comicId, comicDetails);
+                            listener.onFinish(comicDetails);
+                        });
                     });
                 });
             } else {
@@ -237,9 +146,6 @@ public class ComicRepository {
 
                 });
     }
-    public static void updateRating(String comicId, double rating, OnFinishListener<Boolean> listener) {
-
-    }
     public static Episode documentToEpisode(DocumentSnapshot docs) {
         Episode episode = new Episode();
         episode.setEpisodeId(docs.getId());
@@ -250,27 +156,6 @@ public class ComicRepository {
         List<String> contents = (List<String>) docs.get("content");
         episode.setContent(contents != null ? new ArrayList<>(contents) : new ArrayList<>());
         return episode;
-    }
-
-    public static ViewingHistory documentToViewingHistory(DocumentSnapshot docs) {
-        ViewingHistory viewingHistory = new ViewingHistory();
-        viewingHistory.setLastViewedTimestamp(docs.getTimestamp("lastViewedTimestamp"));
-        viewingHistory.setComicId(docs.getId());
-        viewingHistory.setImageUrl((String) docs.get("imageUrl"));
-        viewingHistory.setComicTitle((String) docs.get("comicTitle"));
-        viewingHistory.setLastViewedEpisodeId((String) docs.get("lastViewedEpisodeId"));
-        viewingHistory.setNextEpisodeId((String) docs.get("nextEpisodeId"));
-        return viewingHistory;
-    }
-
-    public static Favorites documentToFavorites(DocumentSnapshot docs) {
-        Favorites favorites = new Favorites(
-                docs.getId(),
-                (String) docs.get("title"),
-                (String) docs.get("imageUrl"),
-                (Timestamp) docs.get("createdAt")
-        );
-        return favorites;
     }
 
     public static void getComicsBySchedule(String schedule, OnFinishListener<ArrayList<Comic>> listener) {
