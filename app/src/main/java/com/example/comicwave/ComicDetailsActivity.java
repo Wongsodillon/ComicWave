@@ -1,5 +1,6 @@
 package com.example.comicwave;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -266,6 +267,13 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
                 .into(detailWhereYouLeftOffImage);
         detailWhereYouLeftOffTitle.setText(String.format("%d. %s", episode.getEpisodeNumber(), episode.getTitle()));
         detailWhereYouLeftOffReleaseDate.setText(DateHelper.format(episode.getReleaseDate()));
+        detailWhereYouLeftOffLayout.setOnClickListener(e -> {
+            Intent i = new Intent(this, EpisodeContent.class);
+            i.putExtra("comicId", comicId);
+            i.putExtra("episodeId", episode.getEpisodeId());
+            startActivity(i);
+            finish();
+        });
     }
 
     private void fetchData() {

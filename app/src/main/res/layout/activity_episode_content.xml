@@ -24,6 +24,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:alignItems="center"
         app:justifyContent="space_between"
+
         >
         <ImageView
             android:id="@+id/contentBackButton"
@@ -35,10 +36,17 @@
             android:id="@+id/contentEpisodeTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxWidth="250dp"
+            android:ellipsize="marquee"
+            android:singleLine="true"
             android:textColor="@color/white"
-            android:text="Episode 14: Ozymandias"
+            android:text=""
+            android:scrollHorizontally="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:fontFamily="@font/poppins_semi_bold"
             android:textSize="20sp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             />
         <ImageView
             android:layout_width="32dp"

@@ -1,6 +1,8 @@
 package com.example.comicwave;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.comicwave.adapters.EpisodeAdapter;
 import com.example.comicwave.adapters.EpisodeContentAdapter;
+import com.example.comicwave.helpers.AnimationHelper;
 import com.example.comicwave.models.Episode;
 import com.example.comicwave.repositories.ComicRepository;
 import com.google.android.flexbox.FlexboxLayout;
@@ -55,9 +58,30 @@ public class EpisodeContent extends AppCompatActivity {
 
     private void populateUI() {
         contentEpisodeTitle.setText(String.format("Episode %d: %s", episode.getEpisodeNumber(), episode.getTitle()));
+        contentEpisodeTitle.setSelected(true);
         episodeAdapter = new EpisodeContentAdapter(episode.getContent());
         episodeContents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         episodeContents.setAdapter(episodeAdapter);
+
+        contentBackButton.setOnClickListener(e -> {
+            getOnBackPressedDispatcher().onBackPressed();
+        });
+    }
+
+    private void initializeScrollingEffect() {
+        episodeContents.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (scrollY > oldScrollY) {
+                    AnimationHelper.fadeOut(contentTopNavbar);
+                    AnimationHelper.fadeOut(contentBottomNavbar);
+                }
+                else if (scrollY < oldScrollY - 3) {
+                    AnimationHelper.fadeIn(contentTopNavbar);
+                    AnimationHelper.fadeIn(contentBottomNavbar);
+                }
+            }
+        });
     }
 
     private void fetchData() {
@@ -69,6 +93,7 @@ public class EpisodeContent extends AppCompatActivity {
             }
             episode = result;
             populateUI();
+            initializeScrollingEffect();
         });
     }
 }
