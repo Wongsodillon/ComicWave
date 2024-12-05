@@ -1,6 +1,7 @@
 package com.example.comicwave.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.comicwave.EpisodeContent;
 import com.example.comicwave.R;
 import com.example.comicwave.helpers.DateHelper;
 import com.example.comicwave.models.Episode;
@@ -46,6 +48,12 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
                 .into(holder.itemEpisodeImage);
         holder.itemEpisodeTitle.setText(String.format("%d. %s", episode.getEpisodeNumber(), episode.getTitle()));
         holder.itemEpisodeReleaseDate.setText(DateHelper.format(episode.getReleaseDate()));
+        holder.itemView.setOnClickListener(e -> {
+            Intent i = new Intent(activityContext, EpisodeContent.class);
+            i.putExtra("episodeId", episode.getEpisodeId());
+            i.putExtra("comicId", episode.getComicId());
+            activityContext.startActivity(i);
+        });
     }
 
     @Override

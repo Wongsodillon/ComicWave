@@ -16,6 +16,9 @@
         android:theme="@style/Theme.ComicWave"
         tools:targetApi="31">
         <activity
+            android:name=".EpisodeContent"
+            android:exported="false" />
+        <activity
             android:name=".ComicDetailsActivity"
             android:exported="false" />
         <activity

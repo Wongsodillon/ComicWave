@@ -11,7 +11,7 @@ public class Episode {
     private ArrayList<String> content;
     private Timestamp releaseDate;
     private String imageUrl;
-
+    private String comicId;
     public String getEpisodeId() {
         return episodeId;
     }
@@ -58,5 +58,13 @@ public class Episode {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getComicId() {
+        return comicId;
+    }
+
+    public void setComicId(String comicId) {
+        this.comicId = comicId;
     }
 }

@@ -108,7 +108,7 @@ public class ComicRepository {
                             .get()
                             .addOnSuccessListener(episodeSnapshot -> {
                                 if (episodeSnapshot != null) {
-                                    Episode episode = documentToEpisode(episodeSnapshot);
+                                    Episode episode = documentToEpisode(episodeSnapshot, comicId);
                                     Log.d("ComicDetails", episode.getTitle());
                                     listener.onFinish(episode);
                                 } else {
@@ -136,7 +136,7 @@ public class ComicRepository {
                    } else {
                        ArrayList<Episode> episodes = new ArrayList<>();
                        for (DocumentSnapshot snapshot : snapshots) {
-                           Episode episode = documentToEpisode(snapshot);
+                           Episode episode = documentToEpisode(snapshot, comicId);
                            episodes.add(episode);
                            Log.d("ComicDetails", episode.getTitle());
                        }
@@ -146,7 +146,22 @@ public class ComicRepository {
 
                 });
     }
-    public static Episode documentToEpisode(DocumentSnapshot docs) {
+    public static void getEpisodeByID(String comicId, String episodeId, OnFinishListener<Episode> listener) {
+        comicRef.document(comicId).collection("episode")
+                .document(episodeId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        listener.onFinish(documentToEpisode(snapshot, comicId));
+                    } else {
+                        listener.onFinish(null);
+                    }
+                }).addOnFailureListener(e -> {
+                    listener.onFinish(null);
+                });
+    }
+
+    public static Episode documentToEpisode(DocumentSnapshot docs, String comicId) {
         Episode episode = new Episode();
         episode.setEpisodeId(docs.getId());
         episode.setEpisodeNumber(docs.getDouble("episodeNumber").intValue());
@@ -154,6 +169,7 @@ public class ComicRepository {
         episode.setReleaseDate((Timestamp) docs.get("releaseDate"));
         episode.setTitle((String) docs.get("title"));
         List<String> contents = (List<String>) docs.get("content");
+        episode.setComicId(comicId);
         episode.setContent(contents != null ? new ArrayList<>(contents) : new ArrayList<>());
         return episode;
     }

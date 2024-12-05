@@ -1,0 +1,74 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main"
+    tools:context=".EpisodeContent">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/episodeContents"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/contentTopNavbar"
+        app:layout_constraintBottom_toTopOf="@id/contentBottomNavbar" />
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/contentTopNavbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="16dp"
+        android:background="@color/primary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:alignItems="center"
+        app:justifyContent="space_between"
+        >
+        <ImageView
+            android:id="@+id/contentBackButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/back_icon"
+            />
+        <TextView
+            android:id="@+id/contentEpisodeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Episode 14: Ozymandias"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:textSize="20sp"
+            />
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            />
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/contentBottomNavbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/primary"
+        app:justifyContent="space_between"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/contentPrevButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/back_icon"
+            />
+        <ImageView
+            android:id="@+id/contentNextButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:rotation="180"
+            android:src="@drawable/back_icon"/>
+    </com.google.android.flexbox.FlexboxLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
