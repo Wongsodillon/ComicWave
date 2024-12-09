@@ -4,6 +4,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.comicwave.ComicDetailsActivity;
+import com.example.comicwave.helpers.DateHelper;
 import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
 import com.example.comicwave.models.Comic;
@@ -21,15 +22,25 @@ import com.google.firebase.firestore.Query;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class ComicRepository {
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static CollectionReference comicRef = db.collection("comic");
     private static HashMap<String, ComicDetails> cachedComicDetails = new HashMap<>();
     private static HashMap<String, ArrayList<Comic>> cachedScheduleData = new HashMap<>();
+    private static ArrayList<Comic> mostFavoritedComics = new ArrayList<>();
+    private static ArrayList<Comic> genresComics1 = new ArrayList<>();
+    private static ArrayList<Comic> genresComics2 = new ArrayList<>();
     public static void getMostFavorited(OnFinishListener<ArrayList<Comic>> listener) {
+        if (!mostFavoritedComics.isEmpty()) {
+            listener.onFinish(mostFavoritedComics);
+            return;
+        }
         ArrayList<Comic> comics = new ArrayList<>();
         comicRef
                 .limit(10)
@@ -42,11 +53,34 @@ public class ComicRepository {
                     comics.add(comic);
                 }
             }
+            mostFavoritedComics.clear();
+            mostFavoritedComics.addAll(comics);
             listener.onFinish(comics);
 
         }).addOnFailureListener(e -> {
 
         });
+    }
+
+    public static void getComicsByGenre(String genre, OnFinishListener<ArrayList<Comic>> listener) {
+        ArrayList<Comic> comics = new ArrayList<>();
+        comicRef.whereArrayContains("genres", genre)
+                .limit(7)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                   if (snapshots.isEmpty()) {
+                       listener.onFinish(null);
+                   }
+                   for (DocumentSnapshot snapshot : snapshots) {
+                       Comic comic = documentToComic(snapshot);
+                       comics.add(comic);
+                   }
+                   Collections.shuffle(comics);
+                   listener.onFinish(comics);
+                })
+                .addOnFailureListener(e -> {
+                    listener.onFinish(null);
+                });
     }
 
     public static void searchComics(String query, OnFinishListener<ArrayList<Comic>> listener) {
@@ -67,13 +101,19 @@ public class ComicRepository {
                 });
     }
     public static void getFeaturedComic(OnFinishListener<Comic> listener) {
-        DocumentReference docs = comicRef.document("LeZQkfT1RJTNDV2K1aMI");
-        docs.get().addOnSuccessListener(snapshot -> {
-            if (snapshot.exists()) {
-                Comic comic = documentToComic(snapshot);
-                listener.onFinish(comic);
-            }
-        });
+        String today = DateHelper.whatDayIsToday();
+        Log.d("ComicRepository", today);
+        comicRef.whereEqualTo("schedule", today)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    Random random = new Random();
+                    int randomIndex = random.nextInt(snapshots.size());
+
+                    Comic comic = documentToComic(snapshots.getDocuments().get(randomIndex));
+                    listener.onFinish(comic);
+                }).addOnFailureListener(e -> {
+                    listener.onFinish(null);
+                });
     }
     public static void getComicDetailsByID(String comicId, String userId, OnFinishListener<ComicDetails> listener) {
         DocumentReference docs = comicRef.document(comicId);
@@ -158,6 +198,34 @@ public class ComicRepository {
                     }
                 }).addOnFailureListener(e -> {
                     listener.onFinish(null);
+                });
+    }
+
+    public static void getNextEpisodeID(String comicId, Integer episodeNumber, OnFinishListener<String> listener) {
+        comicRef.document(comicId).collection("episode")
+                .whereEqualTo("episodeNumber", episodeNumber + 1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots.isEmpty()) {
+                        listener.onFinish(null);
+                    }
+                    else {
+                        listener.onFinish(snapshots.getDocuments().get(0).getId());
+                    }
+                });
+    }
+
+    public static void getPrevEpisodeID(String comicId, Integer episodeNumber, OnFinishListener<String> listener) {
+        comicRef.document(comicId).collection("episode")
+                .whereEqualTo("episodeNumber", episodeNumber - 1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots.isEmpty()) {
+                        listener.onFinish(null);
+                    }
+                    else {
+                        listener.onFinish(snapshots.getDocuments().get(0).getId());
+                    }
                 });
     }
 

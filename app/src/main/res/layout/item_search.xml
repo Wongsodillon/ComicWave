@@ -19,7 +19,7 @@
         app:flexDirection="column"
         app:justifyContent="space_between"
         android:layout_marginStart="16dp"
-        android:layout_marginVertical="8dp"
+        android:layout_marginVertical="4dp"
         >
         <TextView
             android:id="@+id/itemSearchTitle"

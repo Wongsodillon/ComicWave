@@ -268,7 +268,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         detailWhereYouLeftOffTitle.setText(String.format("%d. %s", episode.getEpisodeNumber(), episode.getTitle()));
         detailWhereYouLeftOffReleaseDate.setText(DateHelper.format(episode.getReleaseDate()));
         detailWhereYouLeftOffLayout.setOnClickListener(e -> {
-            Intent i = new Intent(this, EpisodeContent.class);
+            Intent i = new Intent(this, EpisodeContentActivity.class);
             i.putExtra("comicId", comicId);
             i.putExtra("episodeId", episode.getEpisodeId());
             startActivity(i);

@@ -7,7 +7,7 @@ public class AnimationHelper {
     public static void fadeOut(View view) {
         view.animate()
                 .alpha(0)
-                .setDuration(150)
+                .setDuration(75)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {

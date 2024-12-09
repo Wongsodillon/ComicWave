@@ -51,8 +51,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.android.material:material:1.9.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.facebook.shimmer:shimmer:0.5.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
-
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+    implementation("jp.wasabeef:glide-transformations:4.3.0")
+    implementation("jp.co.cyberagent.android:gpuimage:2.1.0")
 }

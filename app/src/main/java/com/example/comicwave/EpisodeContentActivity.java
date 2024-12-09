@@ -1,9 +1,11 @@
 package com.example.comicwave;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -14,16 +16,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.comicwave.adapters.EpisodeAdapter;
 import com.example.comicwave.adapters.EpisodeContentAdapter;
 import com.example.comicwave.helpers.AnimationHelper;
 import com.example.comicwave.models.Episode;
 import com.example.comicwave.repositories.ComicRepository;
 import com.google.android.flexbox.FlexboxLayout;
 
-import java.util.ArrayList;
-
-public class EpisodeContent extends AppCompatActivity {
+public class EpisodeContentActivity extends AppCompatActivity {
 
     private FlexboxLayout contentTopNavbar, contentBottomNavbar;
     private TextView contentEpisodeTitle;
@@ -32,6 +31,8 @@ public class EpisodeContent extends AppCompatActivity {
     private String comicId, episodeId;
     private Episode episode;
     private EpisodeContentAdapter episodeAdapter;
+    private ProgressBar contentLoading;
+    private View contentOverlay;
     private void initComponents() {
         contentTopNavbar = findViewById(R.id.contentTopNavbar);
         contentBottomNavbar = findViewById(R.id.contentBottomNavbar);
@@ -40,6 +41,8 @@ public class EpisodeContent extends AppCompatActivity {
         contentBackButton = findViewById(R.id.contentBackButton);
         contentPrevButton = findViewById(R.id.contentPrevButton);
         contentNextButton = findViewById(R.id.contentNextButton);
+        contentLoading = findViewById(R.id.contentLoading);
+        contentOverlay = findViewById(R.id.contentOverlay);
     }
 
     @Override
@@ -66,12 +69,59 @@ public class EpisodeContent extends AppCompatActivity {
         contentBackButton.setOnClickListener(e -> {
             getOnBackPressedDispatcher().onBackPressed();
         });
+        Log.d("EpisodeContent", getIntent().getIntExtra("nexts", 0) + "");
+        if (getIntent().getIntExtra("nexts", 0) <= 0) {
+            contentNextButton.setVisibility(View.INVISIBLE);
+        } else {
+            contentNextButton.setOnClickListener(e -> {
+                contentOverlay.setVisibility(View.VISIBLE);
+                contentLoading.setVisibility(View.VISIBLE);
+                ComicRepository.getNextEpisodeID(comicId, episode.getEpisodeNumber(), id -> {
+                    Intent i = new Intent(this, EpisodeContentActivity.class);
+                    i.putExtra("episodeId", id);
+                    i.putExtra("comicId", episode.getComicId());
+                    i.putExtra("nexts", getIntent().getIntExtra("nexts", 0) - 1);
+                    i.putExtra("prevs", getIntent().getIntExtra("prevs", 0) + 1);
+                    contentOverlay.setVisibility(View.INVISIBLE);
+                    contentLoading.setVisibility(View.INVISIBLE);
+                    this.startActivity(i);
+                    finish();
+                });
+            });
+        }
+        if (getIntent().getIntExtra("prevs", 0) <= 0) {
+            contentPrevButton.setVisibility(View.INVISIBLE);
+        } else {
+            contentPrevButton.setOnClickListener(e -> {
+                contentOverlay.setVisibility(View.VISIBLE);
+                contentLoading.setVisibility(View.VISIBLE);
+                ComicRepository.getPrevEpisodeID(comicId, episode.getEpisodeNumber(), id -> {
+                    Log.d("EpisodeContent", id);
+                    Intent i = new Intent(this, EpisodeContentActivity.class);
+                    i.putExtra("episodeId", id);
+                    i.putExtra("comicId", episode.getComicId());
+                    i.putExtra("nexts", getIntent().getIntExtra("nexts", 0) + 1);
+                    i.putExtra("prevs", getIntent().getIntExtra("prevs", 0) - 1);
+                    contentOverlay.setVisibility(View.INVISIBLE);
+                    contentLoading.setVisibility(View.INVISIBLE);
+                    this.startActivity(i);
+                    finish();
+                });
+            });
+        }
     }
 
     private void initializeScrollingEffect() {
         episodeContents.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                if (!episodeContents.canScrollVertically(1)) {
+                    Log.d("EpisodeContent", "Reached Bottom");
+                    AnimationHelper.fadeIn(contentTopNavbar);
+                    AnimationHelper.fadeIn(contentBottomNavbar);
+                    return;
+                }
                 if (scrollY > oldScrollY) {
                     AnimationHelper.fadeOut(contentTopNavbar);
                     AnimationHelper.fadeOut(contentBottomNavbar);
