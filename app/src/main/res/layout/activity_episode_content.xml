@@ -24,7 +24,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:alignItems="center"
         app:justifyContent="space_between"
-
         >
         <ImageView
             android:id="@+id/contentBackButton"
@@ -64,20 +63,55 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        >
 
-        <ImageView
+        <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/contentPrevButton"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/back_icon"
-            />
-        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:alignItems="center"
+            android:visibility="invisible"
+            >
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/back_icon"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Previous"
+                android:textSize="18sp"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:textColor="@color/white"
+                android:layout_marginStart="4dp"
+                />
+        </com.google.android.flexbox.FlexboxLayout>
+        <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/contentNextButton"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:rotation="180"
-            android:src="@drawable/back_icon"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:alignItems="center"
+            android:visibility="invisible"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next"
+                android:textSize="18sp"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:textColor="@color/white"
+                android:layout_marginStart="4dp"
+                />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/back_icon"
+                android:rotation="180"
+                />
+        </com.google.android.flexbox.FlexboxLayout>
     </com.google.android.flexbox.FlexboxLayout>
 
     <View

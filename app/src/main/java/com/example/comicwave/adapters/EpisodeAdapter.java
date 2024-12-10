@@ -31,8 +31,10 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
 
     private ArrayList<Episode> episodes;
     private Context activityContext;
+    private boolean isAscending;
     public EpisodeAdapter(ArrayList<Episode> episodes) {
         this.episodes = episodes;
+        this.isAscending = true;
     }
 
 
@@ -46,15 +48,29 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     }
 
     private Integer getTotalNexts(Integer position) {
-        int i = position;
-        Log.d("EpisodeContent", "getTotalNexts " + position);
-        for (; i < episodes.size(); i++) {
-            if (!DateHelper.isReleased(episodes.get(i).getReleaseDate())) {
-                break;
+        int count = 0;
+        if (isAscending) {
+            for (int i = position + 1; i < episodes.size(); i++) {
+                Log.d("EpisodeAdapter", "Current Episode " + episodes.get(i).getTitle());
+                if (!DateHelper.isReleased(episodes.get(i).getReleaseDate())) {
+                    break;
+                }
+                count++;
+            }
+        } else {
+            for (int i = position - 1; i >= 0; i--) {
+                Log.d("EpisodeAdapter", "Current Episode " + episodes.get(i).getTitle());
+                if (!DateHelper.isReleased(episodes.get(i).getReleaseDate())) {
+                    break;
+                }
+                count++;
             }
         }
-        Log.d("EpisodeContent", "nexts " + i);
-        return i - position - 1;
+        return count;
+    }
+
+    public void setIsAscending(boolean isAscending) {
+        this.isAscending = isAscending;
     }
 
     @Override
@@ -65,16 +81,15 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
                     .load(episode.getImageUrl())
                     .apply(RequestOptions.bitmapTransform(new RoundedCorners(8)))
                     .into(holder.itemEpisodeImage);
-            if (DateHelper.isReleased(episode.getReleaseDate())) {
-                holder.itemView.setOnClickListener(e -> {
-                    Intent i = new Intent(activityContext, EpisodeContentActivity.class);
-                    i.putExtra("episodeId", episode.getEpisodeId());
-                    i.putExtra("comicId", episode.getComicId());
-                    i.putExtra("nexts", getTotalNexts(episode.getEpisodeNumber() - 1));
-                    i.putExtra("prevs", episode.getEpisodeNumber() - 1);
-                    activityContext.startActivity(i);
-                });
-            }
+            holder.itemView.setOnClickListener(e -> {
+//                Log.d("EpisodeAdapter", position+" "+getTotalNexts(episode.getEpisodeNumber()-1));
+                Intent i = new Intent(activityContext, EpisodeContentActivity.class);
+                i.putExtra("episodeId", episode.getEpisodeId());
+                i.putExtra("comicId", episode.getComicId());
+                i.putExtra("nexts", getTotalNexts(position));
+                i.putExtra("prevs", episode.getEpisodeNumber() - 1);
+                activityContext.startActivity(i);
+            });
             holder.itemEpisodeReleaseDate.setText(DateHelper.format(episode.getReleaseDate()));
         } else {
             Glide.with(activityContext)
@@ -86,6 +101,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
                     )))
                     .into(holder.itemEpisodeImage);
             holder.itemEpisodeReleaseDate.setText(String.format("Coming soon %s", DateHelper.format(episode.getReleaseDate())));
+            holder.itemView.setOnClickListener(null);
         }
         holder.itemEpisodeTitle.setText(String.format("%d. %s", episode.getEpisodeNumber(), episode.getTitle()));
     }

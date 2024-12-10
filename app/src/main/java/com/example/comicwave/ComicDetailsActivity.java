@@ -170,8 +170,10 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
                     @Override
                     public int compare(Episode o1, Episode o2) {
                         if (selected.equals("Oldest")) {
+                            adapter.setIsAscending(true);
                             return o1.getEpisodeNumber() - o2.getEpisodeNumber();
                         } else {
+                            adapter.setIsAscending(false);
                             return o2.getEpisodeNumber() - o1.getEpisodeNumber();
                         }
                     }

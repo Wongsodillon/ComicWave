@@ -8,6 +8,7 @@ import com.example.comicwave.adapters.ReadListAdapter;
 import com.example.comicwave.database.ComicWaveDB;
 import com.example.comicwave.interfaces.OnChangeListener;
 import com.example.comicwave.interfaces.OnFinishListener;
+import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Favorites;
 import com.example.comicwave.models.ReadList;
 import com.example.comicwave.models.User;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.Time;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,7 +214,8 @@ public class UserRepository {
     public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
         CollectionReference viewingHistoryRef = userRef.document(userId).collection("viewingHistory");
         ArrayList<ViewingHistory> histories = new ArrayList<>();
-        viewingHistoryRef.whereNotEqualTo("nextEpisodeId", "")
+        viewingHistoryRef
+                .orderBy("lastViewedTimestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     if (snapshots.isEmpty()) {
@@ -232,6 +235,40 @@ public class UserRepository {
                 });
 
     }
+
+    public static void updateViewingHistory(String comicId, String lastViewedEpisodeId, OnFinishListener<Boolean> callback) {
+        CollectionReference viewingHistoryRef = userRef.document(mAuth.getCurrentUser().getUid()).collection("viewingHistory");
+        HashMap<String, Object> viewingHistoryData = new HashMap<>();
+
+        ComicRepository.comicRef.document(comicId).get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                Comic comic = ComicRepository.documentToComic(snapshot);
+                Log.d("ViewingHistory", "Comic title fetched: " + comic.getTitle());
+
+                viewingHistoryData.put("comicTitle", comic.getTitle());
+                viewingHistoryData.put("imageUrl", comic.getImageUrl());
+
+                viewingHistoryData.put("lastViewedTimestamp", Timestamp.now());
+                viewingHistoryData.put("lastViewedEpisodeId", lastViewedEpisodeId);
+                viewingHistoryData.put("nextEpisodeId", lastViewedEpisodeId);
+
+                viewingHistoryRef.document(comicId).set(viewingHistoryData)
+                        .addOnSuccessListener(e -> {
+                            callback.onFinish(true);
+                        })
+                        .addOnFailureListener(e -> {
+                            callback.onFinish(false);
+                        });
+            } else {
+                Log.w("ViewingHistory", "Comic document not found.");
+                callback.onFinish(false);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("ViewingHistory", "Failed to fetch comic details: " + e.getMessage());
+            callback.onFinish(false);
+        });
+    }
+
 
     public static void checkIfComicIsFavorited(String comicId, String userId, OnFinishListener<Boolean> callback) {
         DocumentReference favoriteDocs = userRef.document(userId).collection("favorites").document(comicId);

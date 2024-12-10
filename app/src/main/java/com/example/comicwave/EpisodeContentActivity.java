@@ -20,19 +20,21 @@ import com.example.comicwave.adapters.EpisodeContentAdapter;
 import com.example.comicwave.helpers.AnimationHelper;
 import com.example.comicwave.models.Episode;
 import com.example.comicwave.repositories.ComicRepository;
+import com.example.comicwave.repositories.UserRepository;
 import com.google.android.flexbox.FlexboxLayout;
 
 public class EpisodeContentActivity extends AppCompatActivity {
 
-    private FlexboxLayout contentTopNavbar, contentBottomNavbar;
+    private FlexboxLayout contentTopNavbar, contentBottomNavbar, contentPrevButton, contentNextButton;;
     private TextView contentEpisodeTitle;
     private RecyclerView episodeContents;
-    private ImageView contentBackButton, contentPrevButton, contentNextButton;
+    private ImageView contentBackButton;
     private String comicId, episodeId;
     private Episode episode;
     private EpisodeContentAdapter episodeAdapter;
     private ProgressBar contentLoading;
     private View contentOverlay;
+    private boolean loading = false;
     private void initComponents() {
         contentTopNavbar = findViewById(R.id.contentTopNavbar);
         contentBottomNavbar = findViewById(R.id.contentBottomNavbar);
@@ -70,31 +72,26 @@ public class EpisodeContentActivity extends AppCompatActivity {
             getOnBackPressedDispatcher().onBackPressed();
         });
         Log.d("EpisodeContent", getIntent().getIntExtra("nexts", 0) + "");
-        if (getIntent().getIntExtra("nexts", 0) <= 0) {
-            contentNextButton.setVisibility(View.INVISIBLE);
-        } else {
+        if (getIntent().getIntExtra("nexts", 0) > 0) {
+            contentNextButton.setVisibility(View.VISIBLE);
             contentNextButton.setOnClickListener(e -> {
-                contentOverlay.setVisibility(View.VISIBLE);
-                contentLoading.setVisibility(View.VISIBLE);
+                toggleLoading();
                 ComicRepository.getNextEpisodeID(comicId, episode.getEpisodeNumber(), id -> {
                     Intent i = new Intent(this, EpisodeContentActivity.class);
                     i.putExtra("episodeId", id);
                     i.putExtra("comicId", episode.getComicId());
                     i.putExtra("nexts", getIntent().getIntExtra("nexts", 0) - 1);
                     i.putExtra("prevs", getIntent().getIntExtra("prevs", 0) + 1);
-                    contentOverlay.setVisibility(View.INVISIBLE);
-                    contentLoading.setVisibility(View.INVISIBLE);
+                    toggleLoading();
                     this.startActivity(i);
                     finish();
                 });
             });
         }
-        if (getIntent().getIntExtra("prevs", 0) <= 0) {
-            contentPrevButton.setVisibility(View.INVISIBLE);
-        } else {
+        if (getIntent().getIntExtra("prevs", 0) > 0) {
+            contentPrevButton.setVisibility(View.VISIBLE);
             contentPrevButton.setOnClickListener(e -> {
-                contentOverlay.setVisibility(View.VISIBLE);
-                contentLoading.setVisibility(View.VISIBLE);
+                toggleLoading();
                 ComicRepository.getPrevEpisodeID(comicId, episode.getEpisodeNumber(), id -> {
                     Log.d("EpisodeContent", id);
                     Intent i = new Intent(this, EpisodeContentActivity.class);
@@ -102,8 +99,7 @@ public class EpisodeContentActivity extends AppCompatActivity {
                     i.putExtra("comicId", episode.getComicId());
                     i.putExtra("nexts", getIntent().getIntExtra("nexts", 0) + 1);
                     i.putExtra("prevs", getIntent().getIntExtra("prevs", 0) - 1);
-                    contentOverlay.setVisibility(View.INVISIBLE);
-                    contentLoading.setVisibility(View.INVISIBLE);
+                    toggleLoading();
                     this.startActivity(i);
                     finish();
                 });
@@ -134,6 +130,27 @@ public class EpisodeContentActivity extends AppCompatActivity {
         });
     }
 
+    private void toggleLoading() {
+        if (!loading) {
+            contentOverlay.setVisibility(View.VISIBLE);
+            contentLoading.setVisibility(View.VISIBLE);
+        } else {
+            contentOverlay.setVisibility(View.INVISIBLE);
+            contentLoading.setVisibility(View.INVISIBLE);
+        }
+        loading = !loading;
+    }
+
+    private void updateViewingHistory() {
+        UserRepository.updateViewingHistory(episode.getComicId(), episode.getEpisodeId(), isSuccess -> {
+            if (isSuccess) {
+                Log.d("EpisodeContent", "Viewing history updated successfully.");
+            } else {
+                Log.w("EpisodeContent", "Failed to update viewing history.");
+            }
+        });
+    }
+
     private void fetchData() {
         comicId = getIntent().getStringExtra("comicId");
         episodeId = getIntent().getStringExtra("episodeId");
@@ -144,6 +161,7 @@ public class EpisodeContentActivity extends AppCompatActivity {
             episode = result;
             populateUI();
             initializeScrollingEffect();
+            updateViewingHistory();
         });
     }
 }

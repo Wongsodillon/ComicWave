@@ -30,15 +30,11 @@ public class SearchFragment extends Fragment {
 
     private SearchViewModel mViewModel;
     private TextInputEditText searchSearchField;
-    private FlexboxLayout recentSearchesSection;
     private RecyclerView searchResults;
     private ArrayList<Comic> comics;
     private SearchResultAdapter adapter;
-
-
     private void initComponents(View view) {
         comics = new ArrayList<>();
-        recentSearchesSection = view.findViewById(R.id.recentSearchesSection);
         searchSearchField = view.findViewById(R.id.searchSearchField);
         searchResults = view.findViewById(R.id.searchResults);
 
@@ -62,13 +58,11 @@ public class SearchFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString().trim();
                 if (query.isEmpty()) {
-                    recentSearchesSection.setVisibility(View.VISIBLE);
                     searchResults.setVisibility(View.GONE);
                     comics.clear();
                     adapter.notifyDataSetChanged();
                 }
                 else {
-                    recentSearchesSection.setVisibility(View.GONE);
                     searchResults.setVisibility(View.VISIBLE);
                     ComicRepository.searchComics(query, results -> {
                         comics.clear();
