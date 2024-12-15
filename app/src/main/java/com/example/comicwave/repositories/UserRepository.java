@@ -16,6 +16,8 @@ import com.example.comicwave.models.ViewingHistory;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -56,6 +58,38 @@ public class UserRepository {
             });
         } else {
             listener.onFinish(CURRENT_USER);
+        }
+    }
+
+    public static void validateOldPassword(String password, OnFinishListener<Boolean> callback) {
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onFinish(false);
+            return;
+        }
+
+        AuthCredential credential = EmailAuthProvider.getCredential(firebaseUser.getEmail(), password);
+        firebaseUser.reauthenticate(credential)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        callback.onFinish(true);
+                    } else {
+                        callback.onFinish(false);
+                    }
+                });
+    }
+
+    public static void updatePassword(String newPassword, OnFinishListener<Boolean> listener) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            user.updatePassword(newPassword)
+                    .addOnSuccessListener(e -> {
+                        listener.onFinish(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        listener.onFinish(false);
+                    });
         }
     }
 

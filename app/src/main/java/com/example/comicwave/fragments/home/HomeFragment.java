@@ -75,8 +75,6 @@ public class HomeFragment extends Fragment {
         homeFeaturedTitle = view.findViewById(R.id.homeFeaturedTitle);
         homeFeaturedGenres = view.findViewById(R.id.homeFeaturedGenres);
 
-
-
         homeContinueReadingSlider = view.findViewById(R.id.homeContinueReadingSlider);
         homeFavoritesSlider = view.findViewById(R.id.homeFavoritesSlider);
         homeContinueReadingLayout = view.findViewById(R.id.homeContinueReadingLayout);

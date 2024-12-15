@@ -6,6 +6,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.comicwave.fragments.account.AccountFragment;
 import com.example.comicwave.fragments.favorites.FavoritesFragment;
 import com.example.comicwave.fragments.home.HomeFragment;
 import com.example.comicwave.fragments.schedule.ScheduleFragment;
@@ -41,6 +42,10 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             } else if (item.getItemId() == R.id.navigation_favorites) {
                 loadFragment(new FavoritesFragment());
+                return true;
+            }
+            else if (item.getItemId() == R.id.navigation_account) {
+                loadFragment(new AccountFragment());
                 return true;
             }
             else {

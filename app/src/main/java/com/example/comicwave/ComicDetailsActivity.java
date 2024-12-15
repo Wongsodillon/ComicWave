@@ -278,6 +278,18 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         });
     }
 
+    private void refetchWhereYouLeftOff() {
+        ComicRepository.getWhereYouLeftOff(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
+            if (result == null) {
+                Log.d("ComicDetails", "No Episodes");
+                detailWhereYouLeftOffLayout.setVisibility(View.GONE);
+            }
+            else {
+                populateWhereYouLeftOff(result);
+            }
+        });
+    }
+
     private void fetchData() {
         comicId = getIntent().getStringExtra("comicId");
 
@@ -295,17 +307,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
                 new android.os.Handler().postDelayed(this::finish, 500);
             }
         });
-
-        ComicRepository.getWhereYouLeftOff(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
-            if (result == null) {
-                Log.d("ComicDetails", "No Episodes");
-                detailWhereYouLeftOffLayout.setVisibility(View.GONE);
-            }
-            else {
-                populateWhereYouLeftOff(result);
-            }
-        });
-
+        refetchWhereYouLeftOff();
         ComicRepository.getAllEpisodes(comicId, result -> {
             episodes.clear();
             episodes.addAll(result);
@@ -315,8 +317,14 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             adapter.notifyDataSetChanged();
         });
 
-
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refetchWhereYouLeftOff();
+    }
+
     @Override
     public void onRatingSubmitted(double rating) {
         if (rating == 0.0 && userRating == 0.0) {
