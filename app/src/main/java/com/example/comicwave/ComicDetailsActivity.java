@@ -26,6 +26,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.comicwave.adapters.EpisodeAdapter;
 import com.example.comicwave.fragments.ratingSheet.RatingSheetFragment;
 import com.example.comicwave.helpers.DateHelper;
+import com.example.comicwave.helpers.EpisodeHelper;
 import com.example.comicwave.helpers.NumberHelper;
 import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.ComicDetails;
@@ -60,6 +61,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
     Boolean isReadListed = false;
     double userRating;
     private EpisodeAdapter adapter;
+    private boolean isActive = false;
     private void initComponents() {
         toolbar = findViewById(R.id.detailToolbar);
         toolbar = findViewById(R.id.detailToolbar);
@@ -110,6 +112,18 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         detailReadlistText = findViewById(R.id.detailReadlistText);
         detailReadlistIcon = findViewById(R.id.detailReadlistIcon);
         detailReadlistButton = findViewById(R.id.detailReadlistButton);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActive = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActive = false;
     }
 
     @Override
@@ -273,13 +287,15 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             Intent i = new Intent(this, EpisodeContentActivity.class);
             i.putExtra("comicId", comicId);
             i.putExtra("episodeId", episode.getEpisodeId());
+            i.putExtra("nexts", EpisodeHelper.getAvailableNexts(episodes, episode.getEpisodeNumber()-1, true));
+            i.putExtra("prevs", episode.getEpisodeNumber() - 1);
             startActivity(i);
-            finish();
         });
     }
 
     private void refetchWhereYouLeftOff() {
         ComicRepository.getWhereYouLeftOff(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
+            if (!isActive) return;
             if (result == null) {
                 Log.d("ComicDetails", "No Episodes");
                 detailWhereYouLeftOffLayout.setVisibility(View.GONE);
@@ -295,6 +311,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
 
         // Get Comic Details
         ComicRepository.getComicDetailsByID(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
+            if (!isActive) return;
             if (result != null) {
                 comic = result;
                 isFavorited = comic.getFavorited();
@@ -309,6 +326,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
         });
         refetchWhereYouLeftOff();
         ComicRepository.getAllEpisodes(comicId, result -> {
+            if (!isActive) return;
             episodes.clear();
             episodes.addAll(result);
             detailEpisodeLayout.setVisibility(View.VISIBLE);

@@ -81,6 +81,7 @@ public class FavoritesFragment extends Fragment {
     private void fetchFavoritesData() {
         favoritesAdapter.setLoading(true);
         UserRepository.getFavoriteComics(comics -> {
+            if (!isAdded() || isRemoving()) return;
             favoritesData.clear();
             favoritesData.addAll(comics);
             favoritesAdapter.setLoading(false);
@@ -100,6 +101,7 @@ public class FavoritesFragment extends Fragment {
     private void fetchReadListData() {
         readListAdapter.setLoading(true);
         UserRepository.getReadList(comics -> {
+            if (!isAdded() || isRemoving()) return;
             readListData.clear();
             readListData.addAll(comics);
             readListAdapter.setLoading(false);

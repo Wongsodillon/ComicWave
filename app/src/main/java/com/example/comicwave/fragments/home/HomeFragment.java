@@ -36,12 +36,15 @@ import com.example.comicwave.models.ViewingHistory;
 import com.example.comicwave.repositories.ComicRepository;
 import com.example.comicwave.repositories.UserRepository;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Vector;
 
 public class HomeFragment extends Fragment {
     private RecyclerView homeContinueReadingSlider, homeFavoritesSlider, homeMostFavoritesSlider, homeGenresSlider, homeGenresSlider2;
@@ -132,6 +135,7 @@ public class HomeFragment extends Fragment {
 
     private void fetchData() {
         ComicRepository.getFeaturedComic(comic -> {
+            if (!isAdded() || isRemoving()) return;
             Glide.with(this).load(comic.getImageUrl()).into(homeFeaturedImage);
             homeFeaturedTitle.setText(comic.getTitle());
             homeFeaturedGenres.setText(String.join(", ", comic.getGenres()));
@@ -144,6 +148,7 @@ public class HomeFragment extends Fragment {
 
         continueReadingAdapter.setLoading(true);
         UserRepository.getViewingHistory(FirebaseAuth.getInstance().getCurrentUser().getUid(), comics -> {
+            if (!isAdded() || isRemoving()) return;
             continueReadingComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 continueReadingComics.addAll(comics);
@@ -161,6 +166,8 @@ public class HomeFragment extends Fragment {
 
         favoritesAdapter.setLoading(true);
         UserRepository.getFavoriteComics(5, comics -> {
+            if (!isAdded() || isRemoving()) return;
+
             favoriteComics.clear();
             if (comics != null && !comics.isEmpty()) {
                 favoriteComics.addAll(comics);
@@ -179,6 +186,8 @@ public class HomeFragment extends Fragment {
 
         mostFavoritesAdapter.setLoading(true);
         ComicRepository.getMostFavorited(comics -> {
+            if (!isAdded() || isRemoving()) return;
+
             mostFavoritesComics.clear();
             mostFavoritesComics.addAll(comics);
             mostFavoritesAdapter.setLoading(false);
@@ -201,6 +210,7 @@ public class HomeFragment extends Fragment {
 
         comicGenresAdapter.setLoading(true);
         ComicRepository.getComicsByGenre(genre1, results -> {
+            if (!isAdded() || isRemoving()) return;
             comicGenres.clear();
             comicGenres.addAll(results);
             comicGenresAdapter.setLoading(false);
@@ -216,6 +226,7 @@ public class HomeFragment extends Fragment {
 
         comicGenresAdapter2.setLoading(true);
         ComicRepository.getComicsByGenre(genre2, results -> {
+            if (!isAdded() || isRemoving()) return;
             comicGenres2.clear();
             comicGenres2.addAll(results);
             comicGenresAdapter2.setLoading(false);

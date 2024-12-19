@@ -39,6 +39,7 @@ public class AccountFragment extends Fragment {
         accountEmailText = view.findViewById(R.id.accountEmailText);
 
         UserRepository.getCurrentUser(result -> {
+            if (!isAdded() || isRemoving()) return;
             user = result;
             accountNameText.setText(user.getName());
             accountEmailText.setText(user.getEmail());

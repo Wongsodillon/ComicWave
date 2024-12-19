@@ -20,6 +20,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.comicwave.EpisodeContentActivity;
 import com.example.comicwave.R;
 import com.example.comicwave.helpers.DateHelper;
+import com.example.comicwave.helpers.EpisodeHelper;
 import com.example.comicwave.models.Episode;
 
 import java.util.ArrayList;
@@ -36,8 +37,6 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
         this.episodes = episodes;
         this.isAscending = true;
     }
-
-
     @NonNull
     @Override
     public EpisodeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,28 +44,6 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
         LayoutInflater inflate = LayoutInflater.from(activityContext);
         View view = inflate.inflate(R.layout.item_episode, parent, false);
         return new EpisodeViewHolder(view);
-    }
-
-    private Integer getTotalNexts(Integer position) {
-        int count = 0;
-        if (isAscending) {
-            for (int i = position + 1; i < episodes.size(); i++) {
-                Log.d("EpisodeAdapter", "Current Episode " + episodes.get(i).getTitle());
-                if (!DateHelper.isReleased(episodes.get(i).getReleaseDate())) {
-                    break;
-                }
-                count++;
-            }
-        } else {
-            for (int i = position - 1; i >= 0; i--) {
-                Log.d("EpisodeAdapter", "Current Episode " + episodes.get(i).getTitle());
-                if (!DateHelper.isReleased(episodes.get(i).getReleaseDate())) {
-                    break;
-                }
-                count++;
-            }
-        }
-        return count;
     }
 
     public void setIsAscending(boolean isAscending) {
@@ -86,7 +63,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
                 Intent i = new Intent(activityContext, EpisodeContentActivity.class);
                 i.putExtra("episodeId", episode.getEpisodeId());
                 i.putExtra("comicId", episode.getComicId());
-                i.putExtra("nexts", getTotalNexts(position));
+                i.putExtra("nexts", EpisodeHelper.getAvailableNexts(episodes, position, isAscending));
                 i.putExtra("prevs", episode.getEpisodeNumber() - 1);
                 activityContext.startActivity(i);
             });

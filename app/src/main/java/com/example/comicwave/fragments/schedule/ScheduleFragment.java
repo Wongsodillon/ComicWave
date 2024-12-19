@@ -76,7 +76,6 @@ public class ScheduleFragment extends Fragment {
             case 4: return "Friday";
             case 5: return "Saturday";
             case 6: return "Sunday";
-            case 7: return "Daily";
             default: return "";
         }
     }

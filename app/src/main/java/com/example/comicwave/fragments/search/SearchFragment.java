@@ -65,6 +65,7 @@ public class SearchFragment extends Fragment {
                 else {
                     searchResults.setVisibility(View.VISIBLE);
                     ComicRepository.searchComics(query, results -> {
+                        if (!isAdded() || isRemoving()) return;
                         comics.clear();
                         comics.addAll(results);
                         adapter.notifyDataSetChanged();

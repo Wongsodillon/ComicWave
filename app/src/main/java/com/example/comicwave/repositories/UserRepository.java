@@ -25,6 +25,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.Time;
@@ -131,10 +132,10 @@ public class UserRepository {
         });
     }
 
-    public static void getFavoriteComics(Integer limit, OnFinishListener<ArrayList<Favorites>> listener) {
+    public static Task<QuerySnapshot> getFavoriteComics(Integer limit, OnFinishListener<ArrayList<Favorites>> listener) {
         CollectionReference favoriteRef = userRef.document(mAuth.getCurrentUser().getUid()).collection("favorites");
         ArrayList<Favorites> favorites = new ArrayList<>();
-        favoriteRef
+        Task<QuerySnapshot> task = favoriteRef
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(limit)
                 .get().addOnSuccessListener(snapshots -> {
@@ -147,6 +148,7 @@ public class UserRepository {
                 }).addOnFailureListener(e -> {
                     listener.onFinish(null);
                 });
+        return task;
     }
     public static void addToFavorites(String comicId, String title, String imageUrl, OnFinishListener<Boolean> listener) {
         DocumentReference docs = userRef.document(mAuth.getCurrentUser().getUid());
@@ -245,10 +247,10 @@ public class UserRepository {
             listener.onFinish(false);
         });
     }
-    public static void getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
+    public static Task<QuerySnapshot> getViewingHistory(String userId, OnFinishListener<ArrayList<ViewingHistory>> listener) {
         CollectionReference viewingHistoryRef = userRef.document(userId).collection("viewingHistory");
         ArrayList<ViewingHistory> histories = new ArrayList<>();
-        viewingHistoryRef
+        Task<QuerySnapshot> task = viewingHistoryRef
                 .orderBy("lastViewedTimestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshots -> {
@@ -267,7 +269,7 @@ public class UserRepository {
                 .addOnFailureListener(e -> {
                     Log.e("View History", "Error fetching data", e);
                 });
-
+        return task;
     }
 
     public static void updateViewingHistory(String comicId, String lastViewedEpisodeId, OnFinishListener<Boolean> callback) {
