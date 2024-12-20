@@ -82,15 +82,15 @@ public class FavoritesFragment extends Fragment {
         favoritesAdapter.setLoading(true);
         UserRepository.getFavoriteComics(comics -> {
             if (!isAdded() || isRemoving()) return;
-            favoritesData.clear();
-            favoritesData.addAll(comics);
-            favoritesAdapter.setLoading(false);
             if (comics.isEmpty()) {
                 favoritesRecyclerView.setVisibility(View.GONE);
                 favoritesEmptyMessage.setText("You have no favorite comics!");
                 favoritesEmptyMessage.setVisibility(View.VISIBLE);
             }
             else {
+                favoritesData.clear();
+                favoritesData.addAll(comics);
+                favoritesAdapter.setLoading(false);
                 favoritesRecyclerView.setVisibility(View.VISIBLE);
                 favoritesEmptyMessage.setVisibility(View.GONE);
             }
@@ -102,15 +102,15 @@ public class FavoritesFragment extends Fragment {
         readListAdapter.setLoading(true);
         UserRepository.getReadList(comics -> {
             if (!isAdded() || isRemoving()) return;
-            readListData.clear();
-            readListData.addAll(comics);
-            readListAdapter.setLoading(false);
             if (comics.isEmpty()) {
                 favoritesRecyclerView.setVisibility(View.GONE);
                 favoritesEmptyMessage.setText("Your Read List is still empty!");
                 favoritesEmptyMessage.setVisibility(View.VISIBLE);
             }
             else {
+                readListData.clear();
+                readListData.addAll(comics);
+                readListAdapter.setLoading(false);
                 favoritesRecyclerView.setVisibility(View.VISIBLE);
                 favoritesEmptyMessage.setVisibility(View.GONE);
             }

@@ -2,6 +2,7 @@ package com.example.comicwave;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.comicwave.adapters.EpisodeContentAdapter;
 import com.example.comicwave.helpers.AnimationHelper;
+import com.example.comicwave.models.Comic;
 import com.example.comicwave.models.Episode;
 import com.example.comicwave.repositories.ComicRepository;
 import com.example.comicwave.repositories.UserRepository;
@@ -35,6 +37,10 @@ public class EpisodeContentActivity extends AppCompatActivity {
     private ProgressBar contentLoading;
     private View contentOverlay;
     private boolean loading = false;
+    private boolean addToView = false;
+    private Handler handler;
+    private Runnable viewChecker;
+    private Integer minimalViewTime = 60000;
     private void initComponents() {
         contentTopNavbar = findViewById(R.id.contentTopNavbar);
         contentBottomNavbar = findViewById(R.id.contentBottomNavbar);
@@ -59,6 +65,26 @@ public class EpisodeContentActivity extends AppCompatActivity {
         });
         initComponents();
         fetchData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (handler != null && viewChecker != null) {
+            handler.removeCallbacks(viewChecker);
+        }
+        if (addToView) {
+            ComicRepository.updateTotalViews(comicId);
+        }
+    }
+
+    private void startTracking() {
+        handler = new Handler();
+        viewChecker = () -> {
+            addToView = true;
+            Log.d("EpisodeContent", "Add to view after " + minimalViewTime + " milliseconds");
+        };
+        handler.postDelayed(viewChecker, minimalViewTime);
     }
 
     private void populateUI() {
@@ -122,7 +148,7 @@ public class EpisodeContentActivity extends AppCompatActivity {
                     AnimationHelper.fadeOut(contentTopNavbar);
                     AnimationHelper.fadeOut(contentBottomNavbar);
                 }
-                else if (scrollY < oldScrollY - 3) {
+                else if (scrollY < oldScrollY) {
                     AnimationHelper.fadeIn(contentTopNavbar);
                     AnimationHelper.fadeIn(contentBottomNavbar);
                 }
@@ -162,6 +188,7 @@ public class EpisodeContentActivity extends AppCompatActivity {
             populateUI();
             initializeScrollingEffect();
             updateViewingHistory();
+            startTracking();
         });
     }
 }

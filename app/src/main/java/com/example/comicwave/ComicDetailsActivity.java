@@ -210,6 +210,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             if (isFavorited) {
                 UserRepository.addToFavorites(comicId, comic.getComic().getTitle(), comic.getComic().getImageUrl(), success -> {
                     if (success) {
+                        ComicRepository.updateFavorites(comicId, 1);
                         Log.d("Favorite", "Added to favorites");
                     } else {
                         Log.d("Favorite", "Failed to add to favorites");
@@ -221,6 +222,7 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
             } else {
                 UserRepository.removeFromFavorites(comicId, success -> {
                     if (success) {
+                        ComicRepository.updateFavorites(comicId, -1);
                         Log.d("Favorite", "Removed from favorites");
                     } else {
                         Log.d("Favorite", "Failed to remove from favorites");
@@ -309,7 +311,6 @@ public class ComicDetailsActivity extends AppCompatActivity implements RatingShe
     private void fetchData() {
         comicId = getIntent().getStringExtra("comicId");
 
-        // Get Comic Details
         ComicRepository.getComicDetailsByID(comicId, FirebaseAuth.getInstance().getCurrentUser().getUid(), result -> {
             if (!isActive) return;
             if (result != null) {

@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">ComicWave</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_web_client_id">494126440591-f28gu4atjnifkoaua6u345vdrsit3k3h.apps.googleusercontent.com</string>
 </resources>

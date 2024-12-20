@@ -7,6 +7,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +26,7 @@ public class SignUpActivity extends AppCompatActivity {
     TextView signUpLoginButton;
     Button signUpSignUpButton;
     EditText signUpFullNameField, signUpEmailField, signUpPasswordField, signUpConfirmPasswordField;
-    ProgressBar signUpProgressBar;
+    FrameLayout signUpProgressBar;
     private void initComponents() {
         signUpLoginButton = findViewById(R.id.signUpLoginButton);
         signUpSignUpButton = findViewById(R.id.signUpSignUpButton);

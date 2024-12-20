@@ -16,6 +16,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -198,6 +199,25 @@ public class ComicRepository {
                     }
                 }).addOnFailureListener(e -> {
                     listener.onFinish(null);
+                });
+    }
+
+    public static void updateFavorites(String comicId, Integer value) {
+        comicRef.document(comicId)
+                .update("totalFavorites", FieldValue.increment(value))
+                .addOnSuccessListener(e -> {
+                    Log.d("Favorites", comicId + " " + value);
+                })
+                .addOnFailureListener(e -> {
+
+                });
+    }
+
+    public static void updateTotalViews(String comicId) {
+        comicRef.document(comicId)
+                .update("totalViews", FieldValue.increment(1))
+                .addOnCompleteListener(e -> {
+                    Log.d("EpisodeContent", "totalViews Updated");
                 });
     }
 

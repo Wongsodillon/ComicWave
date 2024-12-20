@@ -20,6 +20,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -118,7 +119,8 @@ public class UserRepository {
         ArrayList<Favorites> favorites = new ArrayList<>();
         favoriteRef.get().addOnSuccessListener(snapshots -> {
             if (snapshots.isEmpty()) {
-                listener.onFinish(null);
+                Log.d("Favorites", snapshots.isEmpty() + "");
+                listener.onFinish(favorites);
                 return;
             }
             for (DocumentSnapshot snapshot : snapshots) {
@@ -128,7 +130,7 @@ public class UserRepository {
             }
             listener.onFinish(favorites);
         }).addOnFailureListener(e -> {
-            listener.onFinish(null);
+            listener.onFinish(favorites);
         });
     }
 
@@ -415,6 +417,20 @@ public class UserRepository {
                     listener.onFinish(false);
                 });
     }
+
+    public static void firebaseAuthWithGoogle(String idToken, String displayName, OnFinishListener<Boolean> listener) {
+        Log.d("FirebaseAuth", "Starting Firebase authentication");
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential).addOnSuccessListener(task -> {
+            Log.d("FirebaseAuth", "Sign-in successful");
+            fillUserInfo(displayName, e -> {
+                listener.onFinish(true);
+            });
+        }).addOnFailureListener(e -> {
+            Log.e("FirebaseAuth", "Sign-in failed: " + e.getMessage());
+        });
+    }
+
     public static void isUniqueEmail(String email, OnFinishListener<Boolean> listener) {
         userRef.whereEqualTo("email", email.toLowerCase()).get()
                 .addOnSuccessListener(task -> {
